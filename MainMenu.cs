@@ -22,7 +22,7 @@ namespace MagicInventorySystem
             // Create the menus
             ownerMenu = new OwnerMenu();
             customerMenu = new CustomerMenu();
-            franchiseMenu = new FranchiseMenu();
+            franchiseMenu = new FranchiseMenu(ownerMenu);
 
             
 
@@ -38,33 +38,38 @@ namespace MagicInventorySystem
             DisplayOptionsText = "Enter selection number";
         }
 
-        public override void 
-
         public void Run()
         {
-            // Selected Option
-            int op = -1;
             // Run forever, as the user can exit in the menu
             while (true)
             {
-                op = DisplayMenu();
+                HandleMenu();
+            }
+        }
 
-                switch(op)
-                {
-                    case 1:
-                        //ownerMenu.DisplayMenu();
-                        break;
-                    case 2:
-                        //franchiseMenu.DisplayMenu();
-                        break;
-                    case 3:
-                        customerMenu.SelectStore(ownerMenu._stores);
-                        customerMenu.HandleMenu();
-                        break;
-                    case 4:
-                        Environment.Exit(0);
-                        break;
-                }
+        public override void HandleMenu()
+        {
+            // Selected Option
+            int op = -1;
+
+            op = DisplayMenu();
+
+            switch (op)
+            {
+                case 1:
+                    //ownerMenu.DisplayMenu();
+                    break;
+                case 2:
+                    franchiseMenu.SelectStore(ownerMenu._stores);
+                    franchiseMenu.HandleMenu();
+                    break;
+                case 3:
+                    customerMenu.SelectStore(ownerMenu._stores);
+                    customerMenu.HandleMenu();
+                    break;
+                case 4:
+                    Environment.Exit(0);
+                    break;
             }
         }
 

@@ -40,12 +40,16 @@ namespace MagicInventorySystem
 
             // Initialise store inventory
             StoreInventory = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(@"dat\" + StoreName + @"_inventory.txt"));
+            if(StoreInventory == null)
+                StoreInventory = new List<Item>();
         }
 
         // Add another item to the inventory
         public void AddInventoryItem(Item itemToAdd)
         {
             StoreInventory.Add(itemToAdd);
+            // Save the new inventory
+            SaveInventory();
         }
 
         // Save the inventory to a JSON file

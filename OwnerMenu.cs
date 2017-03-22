@@ -13,7 +13,7 @@ namespace MagicInventorySystem
     class OwnerMenu : Menu
     {
         // Stock Items (Perhaps make a stock class?)
-        List<Item> _stock = new List<Item>();
+        public List<Item> _stock = new List<Item>();
         // Stores
         public List<Store> _stores { get; private set; }
         // Requests made by stores
@@ -42,7 +42,7 @@ namespace MagicInventorySystem
         }
 
         // The owners menu
-        void DisplayMenu()
+        public override void HandleMenu()
         {
             int op = Formatter.DisplayMenu(ownerTitle, ownerOptions);
             switch(op)
@@ -151,6 +151,11 @@ namespace MagicInventorySystem
         }
 
         void DisplayAllProductLines()
+        {
+
+        }
+
+        public void AddStockRequest(StockRequest sr)
         {
 
         }
