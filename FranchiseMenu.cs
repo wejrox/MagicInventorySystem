@@ -10,7 +10,11 @@ namespace MagicInventorySystem
     {
         public FranchiseMenu()
         {
-
         }
+
+        public override void HandleMenu()
+        {
+            throw new NotImplementedException();
+        }        
     }
 }

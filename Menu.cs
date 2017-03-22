@@ -21,6 +21,9 @@ namespace MagicInventorySystem
             ShouldExitMenu = false;
         }
 
+        // Handling the option provided, implemented inside each menu
+        public abstract void HandleMenu();
+
         // Display a menu and return the option chosen
         // Takes a title, and the options to choose from
         public int DisplayMenu()

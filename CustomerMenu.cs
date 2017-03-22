@@ -39,7 +39,7 @@ namespace MagicInventorySystem
         }
 
         // Handles the menu display
-        public void HandleMenu()
+        public override void HandleMenu()
         {
             while (ShouldExitMenu == false)
             {

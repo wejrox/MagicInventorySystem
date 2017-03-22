@@ -38,6 +38,8 @@ namespace MagicInventorySystem
             DisplayOptionsText = "Enter selection number";
         }
 
+        public override void 
+
         public void Run()
         {
             // Selected Option
