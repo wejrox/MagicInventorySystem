@@ -8,14 +8,10 @@ namespace MagicInventorySystem
 {
     class FranchiseMenu : Menu
     {
-        OwnerMenu _OwnerMenu;
         Store CurStore { get; set; }
 
-        public FranchiseMenu(OwnerMenu o) : base()
+        public FranchiseMenu() : base()
         {
-            // Set the owner menu for when we need to make a stock request (use JSON instead?)
-            _OwnerMenu = o;
-
             Title = "Franchise Holder Menu";
             Options = new List<string>
             {
@@ -29,6 +25,9 @@ namespace MagicInventorySystem
 
         public override void HandleMenu()
         {
+            // Load the most recent inventory 
+            CurStore.LoadInventory();
+
             while (ShouldExitMenu == false)
             {
                 int op = DisplayMenu();
@@ -59,10 +58,17 @@ namespace MagicInventorySystem
         public void DisplayInventory(bool hasThreshold)
         {
             // Get Threshold
-            Console.Write("How low can an item's stock-level be before restocking? ");
+            Console.WriteLine("How low can an item's stock-level be before restocking? \n(type c or cancel to return to the previous menu)");
             int threshold = -1;
             while (threshold < 0)
+            {
                 threshold = GetIntOptionSelected();
+                // If the user cancels
+                if (threshold == -2)
+                    return;
+            }
+            // Clear for next page
+            Console.Clear();
 
             // Headings
             Console.WriteLine("======================================");
@@ -80,10 +86,11 @@ namespace MagicInventorySystem
             Console.Write("{0, 10}", "Re-Stock");
             Console.WriteLine();
 
+            List<Item> posReq = new List<Item>();
             // Display items
             if (CurStore.StoreInventory != null && CurStore.StoreInventory.Count > 0)
             {
-                for(int i = 0; i < CurStore.StoreInventory.Count; i++)
+                for (int i = 0; i < CurStore.StoreInventory.Count; i++)
                 {
                     // Needs restock?
                     bool restock = false;
@@ -93,57 +100,76 @@ namespace MagicInventorySystem
                     // Display everything if no threshold
                     if (!hasThreshold)
                     {
-                        Console.Write("{0, 4}", CurStore.StoreInventory[i].Id - 1);
-                        Console.Write("{0, 30}", CurStore.StoreInventory[i].Name);
-                        Console.Write("{0, 15}", CurStore.StoreInventory[i].StockLevel);
-                        Console.Write("{0, 10}", restock);
-                        Console.WriteLine();
+                        posReq.Add(CurStore.StoreInventory[i]);
                     }
-                    // Display only if meets restock req.
+                    // Must need restocking to add to the list
                     else if (hasThreshold && restock)
                     {
-                        Console.Write("{0, 4}", CurStore.StoreInventory[i].Id - 1);
-                        Console.Write("{0, 30}", CurStore.StoreInventory[i].Name);
-                        Console.Write("{0, 15}", CurStore.StoreInventory[i].StockLevel);
-                        Console.Write("{0, 10}", restock);
-                        Console.WriteLine();
+                        posReq.Add(CurStore.StoreInventory[i]);
                     }
+                }
+
+                for (int i = 0; i < posReq.Count; i++)
+                {
+                    Console.Write("{0, 4}", i);
+                    Console.Write("{0, 30}", posReq[i].Name);
+                    Console.Write("{0, 15}", posReq[i].StockLevel);
+                    if (posReq[i].StockLevel <= threshold)
+                        Console.Write("{0, 10}", "TRUE");
+                    else
+                        Console.Write("{0, 10}", "FALSE");
+                    Console.WriteLine();
                 }
             }
 
             Console.WriteLine();
 
+            #region Validate Request
             // Get requested item
-            Console.Write("Enter Request to process: ");
+            Console.WriteLine ("Enter Request to process\n(type c or cancel to return to the previous menu): ");
             int op = -1;
-            while (op < 0 || op > CurStore.StoreInventory.Count - 1)
+            while (op < 0 || op > posReq.Count - 1)
             {
                 op = GetIntOptionSelected();
-                if(op < 0 || op > CurStore.StoreInventory.Count - 1)
-                    Console.WriteLine("\'{0}\' is not a valid option on this list, or you did not enter a number.", op);
+                // If the user cancels
+                if (op == -2)
+                    return;
+                if(op > posReq.Count - 1)
+                    Console.WriteLine("\'{0}\' is not a valid option on this list.", op);
                 // Don't let the user re-stock if it doesn't need it
-                else if (CurStore.StoreInventory[op].StockLevel > threshold)
+                else if (posReq[op].StockLevel > threshold)
                 {
                     Console.WriteLine("This item doesn't meet the threshold requirements for restocking.");
                     op = -1; // Reset option so the loop continues
                 }
             }
+            #endregion
 
             // How many to request?
+            Console.WriteLine("How many would you like? (Max 20)");
             int amt = -1;
-            while (amt < 0 || amt > 99) // Nobody should order more than 99?
+            while (amt < 0 || amt > 20) // Nobody should order more than 99?
+            {
                 amt = GetIntOptionSelected();
+                // If the user cancels
+                if (op == -2)
+                    return;
+            }
 
             // Create the request
-            StockRequest sr = new StockRequest(CurStore.StoreInventory[op], CurStore, amt);
-
+            StockRequest sr = new StockRequest(CurStore.StoreInventory[op], CurStore.Id, amt);
             // Handle Request
-            _OwnerMenu.AddStockRequest(sr);
+            JSONUtility.AddAndSaveStockRequest(sr);
+
+            Console.WriteLine("The owner has been notified of your stock request.\nPress any key to return to the Franchise Holder menu...");
+            Console.ReadKey();
         }
 
         // Add an inventory item from the owner stock
         public void AddNewInventoryItem()
         {
+            List<Item> ownerStock = JSONUtility.GetInventory("Owners");
+
             // Headings
             Console.WriteLine("======================================");
             Console.WriteLine(Title);
@@ -159,10 +185,11 @@ namespace MagicInventorySystem
             Console.Write("{0, 15}", "StockLevel");
             Console.WriteLine();
 
-            // Display Owner's stock
-            if (_OwnerMenu._stock != null && _OwnerMenu._stock.Count > 0)
+            List<Item> dispItems = new List<Item>();
+            // Display stock items not in store inventory
+            if (ownerStock != null && ownerStock.Count > 0)
             {
-                for(int i = 0; i < _OwnerMenu._stock.Count; i++)
+                for(int i = 0; i < ownerStock.Count; i++)
                 {
                     // Display if the current store doesn't contain the item
                     bool shouldDisplay = true;
@@ -171,7 +198,7 @@ namespace MagicInventorySystem
                     for (int x = 0; x < CurStore.StoreInventory.Count; x++)
                     {
                         // Check names
-                        if (CurStore.StoreInventory[x].Name == _OwnerMenu._stock[i].Name)
+                        if (CurStore.StoreInventory[x].Name == ownerStock[i].Name)
                         {
                             // Don't display it
                             shouldDisplay = false;
@@ -179,14 +206,17 @@ namespace MagicInventorySystem
                         }
                     }
 
-                    // Print item if it doesn't exist
-                    if (shouldDisplay)
-                    {
-                        Console.Write("{0, 4}", _OwnerMenu._stock[i].Id - 1);
-                        Console.Write("{0, 30}", _OwnerMenu._stock[i].Name);
-                        Console.Write("{0, 15}", _OwnerMenu._stock[i].StockLevel);
-                        Console.WriteLine();
-                    }
+                    if(shouldDisplay)
+                        dispItems.Add(ownerStock[i]);
+                }
+
+                // Print items
+                for(int i = 0; i < dispItems.Count; i++)
+                {
+                    Console.Write("{0, 4}", i);
+                    Console.Write("{0, 30}", dispItems[i].Name);
+                    Console.Write("{0, 15}", dispItems[i].StockLevel);
+                    Console.WriteLine();
                 }
             }
 
@@ -194,46 +224,21 @@ namespace MagicInventorySystem
             // Get the index of the item to add to stock
             Console.Write("Please enter the ID of the item you would like to add: ");
             int op = -1;
-            while (op < 0 || op > _OwnerMenu._stock.Count - 1)
+            while (op < 0 || op > ownerStock.Count - 1)
             {
                 op = GetIntOptionSelected();
-                if (op < 0 || op > _OwnerMenu._stock.Count - 1)
-                    Console.WriteLine("\'{0}\' is not a valid option on this list, or you did not enter a number.", op);
+                if (op == -2)
+                    return;
+                if (op > ownerStock.Count - 1)
+                    Console.WriteLine("\'{0}\' is not a valid option on this list.", op);
             }
 
-            // Don't let the user add to inventory if it already exists 
-            // (deals with numbers entered that aren't displayed)
-            bool shouldAdd = true;
-            for (int i = 0; i < _OwnerMenu._stock.Count; i++)
-            {
-                // Check that this item doesn't exist in your inventory
-                for (int x = 0; x < CurStore.StoreInventory.Count; x++)
-                {
-                    // Check names
-                    if (CurStore.StoreInventory[x].Name == _OwnerMenu._stock[i].Name)
-                    {
-                        // Don't display it
-                        shouldAdd = false;
-                        break; // Leave loop if item been found
-                    }
-                }
-            }
-
-            // Shouldn't be able to add the item?
-            if(!shouldAdd)
-            {
-                Console.WriteLine("The item you have selected already exists in your inventory! (Owner Store ID: {0}).\nPress any key to return to Franchise Menu", op);
-                Console.ReadKey();
-                Console.Clear();
-                return;
-            }
-            
             // Copy the item, give default stock level
-            Item item = new Item(_OwnerMenu._stock[op].Name, 10, _OwnerMenu._stock[op].Price);
+            Item item = new Item(dispItems[op].Name, 10, dispItems[op].Price);
             // Add the item
             CurStore.AddInventoryItem(item);
 
-            Console.WriteLine("\'{0}\' has been added to your inventory!\nPress any key to return to the Franchise Holder Menu", item.Name);
+            Console.WriteLine("\'{0}\' has been added to your inventory! (10 Units)\nPress any key to return to the Franchise Holder Menu", item.Name);
             Console.ReadKey();
         }
 
@@ -243,31 +248,32 @@ namespace MagicInventorySystem
             // option entered
             int option = -1;
 
-            // Repeatedly prints as long as the option entered doesn't exist
-            while (option < 0 || option > stores.Count - 1)
+            // Print store menu
+            Console.WriteLine("======================================");
+            Console.WriteLine(DefaultTitle);
+            Console.WriteLine("======================================");
+            Console.WriteLine();
+            Console.WriteLine("Select a store (type in the ID desired)");
+            Console.WriteLine("--------------------------------------");
+            Console.WriteLine();
+
+            foreach (Store s in stores)
             {
-                Console.WriteLine("======================================");
-                Console.WriteLine(DefaultTitle);
-                Console.WriteLine("======================================");
+                Console.Write("{0, 4}", s.Id + 1 + ". ");
+                Console.Write("{0, 10}", s.StoreName);
                 Console.WriteLine();
-                Console.WriteLine("Select a store");
-                Console.WriteLine("--------------------------------------");
-                Console.WriteLine();
-
-                foreach (Store s in stores)
-                {
-                    Console.Write("{0, 4}", (s.Id + 1) + ". ");
-                    Console.Write("{0, 10}", s.StoreName);
-                    Console.WriteLine();
-                }
-
-                option = GetIntOptionSelected() - 1;
-                Console.Clear();
             }
 
-            CurStore = stores[option];
+            // Get the option selected
+            while (option < 0 || option > stores.Count)
+            {
+                option = GetIntOptionSelected();
+                if (option > stores.Count)
+                    Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 1 to {1}.", option, stores.Count);
+            }
+
+            CurStore = stores[option - 1];
             Title = "Franchise Holder Menu (" + CurStore.StoreName + ")";
-            Console.Clear();
         }
     }
 }

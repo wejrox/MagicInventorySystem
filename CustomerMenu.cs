@@ -10,7 +10,7 @@ namespace MagicInventorySystem
     class CustomerMenu : Menu
     {
         // The store currently selected, for products etc.
-        public Store CurStore { get; set; }
+        Store CurStore { get; set; }
 
         // Current Customer Order
         private CustomerOrder _CustomerOrder { get; set; }
@@ -41,6 +41,9 @@ namespace MagicInventorySystem
         // Handles the menu display
         public override void HandleMenu()
         {
+            // Load the most recent inventory
+            CurStore.LoadInventory();
+
             while (ShouldExitMenu == false)
             {
                 int op = DisplayMenu();
@@ -94,7 +97,7 @@ namespace MagicInventorySystem
                 {
                     for (int i = nextDisplayIndex; i < nextDisplayIndex + ItemsPerPage && i < CurStore.StoreInventory.Count; i++)
                     {
-                        Console.Write("{0, 4}", CurStore.StoreInventory[i].Id - 1);
+                        Console.Write("{0, 4}", i);
                         Console.Write("{0, 30}", CurStore.StoreInventory[i].Name);
                         Console.Write("{0, 15}", CurStore.StoreInventory[i].StockLevel);
                         Console.WriteLine();
@@ -169,12 +172,11 @@ namespace MagicInventorySystem
                                 {
                                     nextDisplayIndex += ItemsPerPage;
                                 }
-                                Console.WriteLine();
+                                Console.Clear();
                                 break;
                             // Return to the menu
                             case 'r':
                             case 'R':
-                                Console.Clear();
                                 return;
                             // Complete and finalise transaction
                             case 'c':
@@ -189,7 +191,7 @@ namespace MagicInventorySystem
                     {
                         int amount = -1;
                         // Amount will be -1 until a number is entered, and this stops negative numbers to increase stock etc.
-                        while (amount < 1)
+                        while (amount < 1 || amount > CurStore.StoreInventory[option].StockLevel)
                         {
                             Console.WriteLine();
                             Console.Write("Please enter amount to purchase: ");
@@ -233,9 +235,8 @@ namespace MagicInventorySystem
                             // Exits Menu loop
                             keepLooping = false;
                         }
-
-                        // Clear console for next output
-                        Console.Clear();
+                        else
+                            Console.Clear();
                     }
                 } // End of option getting
             } // End of menu loop
@@ -290,10 +291,7 @@ namespace MagicInventorySystem
             {
                 Console.WriteLine("No Workshops exist! Press any key to return to the previous menu...");
                 Console.ReadKey();
-                Console.Clear();
-            }
-
-            Console.Clear();
+            }            
         }
 
         // Adds the item selected to the current order, and the quantity
@@ -301,8 +299,7 @@ namespace MagicInventorySystem
         {
             try
             {
-                _CustomerOrder.OrderItems.Add(CurStore.StoreInventory[index]);
-                _CustomerOrder.OrderQuantity.Add(quantity);
+                _CustomerOrder.AddItem(CurStore.StoreInventory[index], quantity);
             }
             // Should never happen, but just in-case
             catch (Exception e) { Console.WriteLine("Could not add item \'{0}\' to your order.", index);  Debug.Write(e.StackTrace);  return; }
@@ -311,13 +308,18 @@ namespace MagicInventorySystem
         // Add the workshop to the current orders list of workshops
         void HandleWorkshopBooking(int index)
         {
-            try
+            if (CurStore.Workshops[index].CurWorkshopParticipants < CurStore.Workshops[index].MaxWorkshopParticipants)
             {
-                _CustomerOrder.Workshops.Add(CurStore.Workshops[index]);
-                _CustomerOrder.BookedIntoWorkshop = true;
+                try
+                {
+                    _CustomerOrder.Workshops.Add(CurStore.Workshops[index]);
+                    _CustomerOrder.BookedIntoWorkshop = true;
+                }
+                // Should never happen, but just in-case
+                catch (Exception) { Console.WriteLine("Could not book you into workshop \'{0}\'.", index); }
             }
-            // Should never happen, but just in-case
-            catch (Exception) { Console.WriteLine("Could not book you into workshop \'{0}\'.", index); }
+            else
+                Console.WriteLine("Workshop is full. Please select a different workshop.");
         }
 
         // Removes items from store stock, reduces workshop availability.
@@ -345,7 +347,7 @@ namespace MagicInventorySystem
                 }
 
                 // Save the JSON file
-                CurStore.SaveInventory();
+                JSONUtility.SaveStoreInventory(CurStore.StoreName, CurStore.StoreInventory);
 
                 for(int i = 0; i < _CustomerOrder.Workshops.Count; i++)
                 {
@@ -395,12 +397,10 @@ namespace MagicInventorySystem
                 }
 
                 option = GetIntOptionSelected() - 1;
-                Console.Clear();
             }
 
             CurStore = stores[option];
             Title = "Customer Menu (" + CurStore.StoreName + ")";
-            Console.Clear();
         }
     }
 }

@@ -16,13 +16,13 @@ namespace MagicInventorySystem
 
         public MainMenu()
         {
-            // Initialize the JSON files
-            InitializeJSON();
+            // Initialize the JSON files if they don't exist
+            JSONUtility.InitializeJSONFiles();
 
             // Create the menus
             ownerMenu = new OwnerMenu();
             customerMenu = new CustomerMenu();
-            franchiseMenu = new FranchiseMenu(ownerMenu);
+            franchiseMenu = new FranchiseMenu();
 
             
 
@@ -57,13 +57,16 @@ namespace MagicInventorySystem
             switch (op)
             {
                 case 1:
-                    //ownerMenu.DisplayMenu();
+                    //ownerMenu = new OwnerMenu(); // Initialize when used
+                    //ownerMenu.HandleMenu();
                     break;
                 case 2:
+                    franchiseMenu = new FranchiseMenu(); // Initialize when used
                     franchiseMenu.SelectStore(ownerMenu._stores);
                     franchiseMenu.HandleMenu();
                     break;
                 case 3:
+                    customerMenu = new CustomerMenu(); // Initialize when used
                     customerMenu.SelectStore(ownerMenu._stores);
                     customerMenu.HandleMenu();
                     break;
@@ -71,33 +74,6 @@ namespace MagicInventorySystem
                     Environment.Exit(0);
                     break;
             }
-        }
-
-        public void InitializeJSON()
-        {
-            string[] JsonFiles = {
-                @"dat\Owners_inventory.txt",
-                @"dat\Stock_requests.txt",
-                @"dat\Altona_inventory.txt",
-                @"dat\Epping_inventory.txt",
-                @"dat\Melbourne_inventory.txt",
-                @"dat\Springvale_inventory.txt",
-                @"dat\Olinda_inventory.txt"
-            };
-
-            // Initialize the directory
-            Directory.CreateDirectory(@"dat");
-            // Create each of the JSON Inventories if they don't exist
-            foreach (string s in JsonFiles)
-            {
-                if (!File.Exists(s))
-                {
-                    FileStream f = File.Create(s);
-                    f.Close();
-                }
-                    
-            }
-            
         }
     }
 }

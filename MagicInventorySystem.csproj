@@ -54,6 +54,7 @@
     <Compile Include="FranchiseMenu.cs" />
     <Compile Include="Driver.cs" />
     <Compile Include="IMenu.cs" />
+    <Compile Include="JSONUtility.cs" />
     <Compile Include="MainMenu.cs" />
     <Compile Include="StockRequest.cs" />
     <Compile Include="Menu.cs" />
