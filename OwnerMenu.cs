@@ -13,7 +13,7 @@ namespace MagicInventorySystem
     class OwnerMenu : Menu
     {
         // Stock Items (Perhaps make a stock class?)
-        List<Item> _stock = new List<Item>();
+        public List<Item> _stock = new List<Item>();
         // Stores
         public List<Store> _stores { get; private set; }
         // Requests made by stores
@@ -42,7 +42,7 @@ namespace MagicInventorySystem
         }
 
         // The owners menu
-        void DisplayMenu()
+        public override void HandleMenu()
         {
             int op = Formatter.DisplayMenu(ownerTitle, ownerOptions);
             switch(op)
@@ -63,7 +63,7 @@ namespace MagicInventorySystem
         // Prints out all current stock requests
         void DisplayAllStockRequests()
         {
-            string[] headers = { "Request ID", "Store", "Product", "Quantity", "Current Stock", "Available" };
+            string[] headers = { "Request ID", "Store ID", "Product", "Quantity", "Current Stock", "Available" };
 
             // Generate heading
             string heading = "";
@@ -83,7 +83,7 @@ namespace MagicInventorySystem
                 string y = "";
                 bool available = ir.Quantity < ir.ItemRequested.StockLevel;
                 y += string.Format("{0,10}", ir.Id);
-                y += string.Format("{0,15}", ir.StoreRequesting.StoreName);
+                y += string.Format("{0,15}", ir.StoreRequesting);
                 y += string.Format("{0,17}", ir.ItemRequested.Name);
                 y += string.Format("{0,17}", ir.Quantity);
                 y += string.Format("{0,17}", ir.ItemRequested.StockLevel);
@@ -122,7 +122,7 @@ namespace MagicInventorySystem
                 if (_available == available)
                 {
                     y += string.Format("{0,10}", ir.Id);
-                    y += string.Format("{0,15}", ir.StoreRequesting.StoreName);
+                    y += string.Format("{0,15}", ir.StoreRequesting);
                     y += string.Format("{0,17}", ir.ItemRequested.Name);
                     y += string.Format("{0,17}", ir.Quantity);
                     y += string.Format("{0,17}", ir.ItemRequested.StockLevel);
@@ -141,7 +141,7 @@ namespace MagicInventorySystem
         // Removes from _itemStock StockLevel
         void ProcessRequest(int op)
         {
-            int storeId = _stockRequests[op].StoreRequesting.Id;
+            int storeId = _stockRequests[op].StoreRequesting;
             int itemId = _stockRequests[op].ItemRequested.Id;
             Console.WriteLine(storeId + " " + itemId);
 
@@ -151,6 +151,11 @@ namespace MagicInventorySystem
         }
 
         void DisplayAllProductLines()
+        {
+
+        }
+
+        public void AddStockRequest(StockRequest sr)
         {
 
         }

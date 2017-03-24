@@ -21,38 +21,40 @@ namespace MagicInventorySystem
             ShouldExitMenu = false;
         }
 
+        // Handling the option provided, implemented inside each menu
+        public abstract void HandleMenu();
+
         // Display a menu and return the option chosen
         // Takes a title, and the options to choose from
         public int DisplayMenu()
         {
+            // Set up for the menu
+            Console.Clear();
             // option entered
             int option = -1;
 
-            // Repeatedly prints as long as the option entered doesn't exist
+            Console.WriteLine("======================================");
+            Console.WriteLine(DefaultTitle);
+            Console.WriteLine("======================================");
+            Console.WriteLine();
+            Console.WriteLine(Title);
+            Console.WriteLine("--------------------------------------");
+            Console.WriteLine();
+            // Print options
+            for (int i = 0; i < Options.Count; i++)
+            {
+                Console.WriteLine("{0, 2}. {1}", i + 1, Options[i]);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Enter an option: ");
+
+            // Get option entered until valid
             while (option < 0 || option > Options.Count)
             {
-                Console.WriteLine("======================================");
-                Console.WriteLine(DefaultTitle);
-                Console.WriteLine("======================================");
-                Console.WriteLine();
-                Console.WriteLine(Title);
-                Console.WriteLine("--------------------------------------");
-                Console.WriteLine();
-                // Print options
-                for (int i = 0; i < Options.Count; i++)
-                {
-                    Console.WriteLine("{0, 2}. {1}", i + 1, Options[i]);
-                }
-
-                Console.WriteLine();
-                Console.WriteLine("Enter an option: ");
-                // Get option entered until valid
-                while (option < 0 || option > Options.Count)
-                {
-                    option = GetIntOptionSelected();
-                    if (option < 0 || option > Options.Count)
-                        Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 1 to {1}.", option, Options.Count);
-                }
+                option = GetIntOptionSelected();
+                if (option > Options.Count)
+                    Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 1 to {1}.", option, Options.Count);
             }
             Console.Clear();
             return option;
@@ -62,13 +64,29 @@ namespace MagicInventorySystem
         public int GetIntOptionSelected()
         {
             int opt = -1;
+            string op = "";
             try
             {
-                string op = Console.ReadLine();
+                op = Console.ReadLine();
+                // Handle cancel
+                if (op.ToLower() == "cancel" || op.ToLower() == "c")
+                { 
+                    return -2;
+                }
+                // Handle quit
+                else if (op.ToLower() == "quit" || op.ToLower() == "q")
+                    Environment.Exit(0);
                 Console.WriteLine();
                 opt = int.Parse(op);
+
+                if (opt < 0)
+                    Console.WriteLine("\'{0}\' is below 0. Please enter a number within range.", opt);
             }
-            catch (Exception) { return -1; } // Didn't work for whatever reason (probably not a number, re-enter)
+            catch (Exception)
+            {
+                Console.WriteLine("\'{0}\' is not a number, please re-enter.", op);
+                return -1;
+            } // Didn't work for whatever reason (probably not a number, re-enter)
 
             return opt;
         }

@@ -8,6 +8,7 @@ namespace MagicInventorySystem
 {
     interface IMenu
     {
+        void HandleMenu();
         int DisplayMenu();
         int GetIntOptionSelected();
     }

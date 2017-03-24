@@ -21,8 +21,8 @@ namespace MagicInventorySystem
 
         public bool BookedIntoWorkshop { get; set; } // Apply discount if booked in
 
-        private int DiscountModifierPercentage { get; set; } = 10;
-        private double TotalCost { get; set; } // Total cost after calculations
+        private double DiscountModifierPercentage { get; set; }
+        private double GrossCost { get; set; } // Total cost pre-calculations
 
         public CustomerOrder()
         {
@@ -31,11 +31,18 @@ namespace MagicInventorySystem
             Workshops = new List<Workshop>();
             CurrentBookingReferenceID = NextReferenceID++;
             BookedIntoWorkshop = false;
+            DiscountModifierPercentage = 10.0f;
         }
 
         public CustomerOrder(string storeName) : this()
         {
             StoreName = storeName;
+        }
+
+        public void AddItem(Item item, int qty)
+        {
+            OrderItems.Add(item);
+            OrderQuantity.Add(qty);
         }
 
         // Returns the receipt
@@ -50,8 +57,12 @@ namespace MagicInventorySystem
             string workshopsHeader = ""; // Column headers
             string workshops = ""; // List of workshops
             string totalPriceText = ""; // Display text before price
-            double price = 0; // Total price before discount
             string combined = ""; // Whole receipt
+
+            // Setup cost
+            double totalPrice = 0.0f; // Total price before discount
+            for (int i = 0; i < OrderItems.Count; i++)
+                GrossCost += OrderItems[i].Price * OrderQuantity[i];
 
             // Set title, showing booking reference ID
             title += "======================================\n";
@@ -62,12 +73,12 @@ namespace MagicInventorySystem
             itemsTitle = "Items Purchased\n";
             itemsTitle += "--------------------------------------";
             // Set receipt header for items purchased
-            itemsHeader = String.Format("{0, 4} {1, 30} {2, 10} {3, 15}", "ID", "Name", "Quantity", "Price (Each)");
+            itemsHeader = String.Format("{0, 4} {1, 30} {2, 10} {3, 15} {4, 15}", "ID", "Name", "Quantity", "Price (Each)", "Price (Total)");
 
             // Add each item to be displayed
             for (int i = 0; i < OrderItems.Count; i++)
             {
-                items += String.Format("{0, 4} {1, 30} {2, 10} {3, 15}", OrderItems[i].Id, OrderItems[i].Name, OrderQuantity[i], OrderItems[i].Price);
+                items += String.Format("{0, 4} {1, 30} {2, 10} {3, 15} {4, 15}", i, OrderItems[i].Name, OrderQuantity[i], OrderItems[i].Price, OrderQuantity[i] * OrderItems[i].Price);
                 items += "\n";
                 // Add to the total (undiscounted) price
             }
@@ -89,14 +100,17 @@ namespace MagicInventorySystem
 
             // Set price text
             if (BookedIntoWorkshop)
-                totalPriceText = "Total price of all items (after 10% workshop discount) : ";
+                totalPriceText = "Total price of all items (after 10% workshop discount) : $";
             else
-                totalPriceText = "Total price of all items : ";
+                totalPriceText = "Total price of all items : $";
+
+            double percOff = (100 - DiscountModifierPercentage) / 100;
 
             // Calculate total price
             if (BookedIntoWorkshop)
-                TotalCost = price * ((100 - DiscountModifierPercentage) / 100); // Items accumulated price modified by discount rate
-            else TotalCost = price;
+                totalPrice = GrossCost * ((100 - DiscountModifierPercentage) / 100); // Items accumulated price modified by discount rate
+            else
+                totalPrice = GrossCost;
 
             // Add it all together
             combined += title;
@@ -114,7 +128,7 @@ namespace MagicInventorySystem
             combined += workshops;
             combined += "\n\n"; // Line space
             combined += totalPriceText;
-            combined += TotalCost;
+            combined += totalPrice;
             combined += "\n\n"; // Line space
 
             // Send back the receipt

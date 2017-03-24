@@ -24,9 +24,8 @@ namespace MagicInventorySystem
             Id = NEXTID++;
         }
 
-        public Item(string name, int stockLevel, double price)
+        public Item(string name, int stockLevel, double price) : this()
         {
-            Id = NEXTID++;
             Name = name;
             StockLevel = stockLevel;
             Price = price;

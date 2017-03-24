@@ -17,7 +17,6 @@ namespace MagicInventorySystem
         public string StoreName { get; private set; }
         [JsonProperty]
         public List<Workshop> Workshops { get; set; }
-
         [JsonProperty]
         public List<Item> StoreInventory { get; set; }
 
@@ -37,21 +36,25 @@ namespace MagicInventorySystem
         public Store(string name) : this()
         {
             StoreName = name;
-
-            // Initialise store inventory
-            StoreInventory = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(@"dat\" + StoreName + @"_inventory.txt"));
+            LoadInventory();
         }
 
         // Add another item to the inventory
         public void AddInventoryItem(Item itemToAdd)
         {
             StoreInventory.Add(itemToAdd);
+            // Save the new inventory
+            JSONUtility.SaveStoreInventory(StoreName, StoreInventory);
         }
 
-        // Save the inventory to a JSON file
-        public void SaveInventory()
+        public void LoadInventory()
         {
-            File.WriteAllText(@"dat\" + StoreName + @"_inventory.txt", JsonConvert.SerializeObject(StoreInventory, Formatting.Indented));
+            // Initialise store inventory
+            StoreInventory = JSONUtility.GetInventory(StoreName);
+
+            // If the JSON files are empty, it will return null so set it
+            if (StoreInventory == null)
+                StoreInventory = new List<Item>();
         }
     }
 }

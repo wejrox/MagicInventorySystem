@@ -15,7 +15,7 @@ namespace MagicInventorySystem
         [JsonProperty]
         public Item ItemRequested { get; private set; }
         [JsonProperty]
-        public Store StoreRequesting { get; private set; } // The store that's requesting, referenced.
+        public int StoreRequesting { get; private set; } // The store that's requesting, always the same ID
         [JsonProperty]
         public int Quantity { get; private set; }
 
@@ -24,7 +24,7 @@ namespace MagicInventorySystem
             Id = NEXTID++;
         }
 
-        public StockRequest(Item itemRequested, Store storeRequesting, int quantity) : this()
+        public StockRequest(Item itemRequested, int storeRequesting, int quantity) : this()
         {
             ItemRequested = itemRequested;
             StoreRequesting = storeRequesting;
