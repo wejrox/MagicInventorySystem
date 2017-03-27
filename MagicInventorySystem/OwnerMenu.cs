@@ -98,7 +98,28 @@ namespace MagicInventorySystem
                 formattedData.Add(y);
             }
 
-            DisplayTable("Current Stock", heading, formattedData);
+            int op = DisplayTable("Current Stock", heading, formattedData);
+
+            //Data Validation
+            int id = -1;
+
+            for (int i = 0; i < Stock.Count; i++)
+            {
+                if (Stock[i].Name == StockRequests[op].ItemRequested.Name)
+                    id = i;
+            }
+
+            if (id == -1)
+            {
+                Console.WriteLine("Item selected doesn't exist in Owner inventory");
+                Console.ReadKey();
+                return;
+            }
+
+            if (StockRequests[op].Quantity < Stock[id].StockLevel)
+                ProcessRequest(op);
+            Console.WriteLine(op);
+            ProcessRequest(op);
 
             Console.ReadKey();
         }
@@ -164,8 +185,12 @@ namespace MagicInventorySystem
 
         // Adds the stock to the shop's inventory stock level
         // Removes from _itemStock StockLevel
-        void ProcessRequest(int op)
+        void ProcessRequest(int stockIndex)
         {
+            // Remove stock from Stock item using stockIndex
+            // Add stock to the store's Inventory using the Stock Request item name
+            // Save the JSON files for StockRequest and the store that's been updated
+
             int itemId = StockRequests[op].ItemRequested.Id;
 
             Stores[StockRequests[op].StoreRequesting].StoreInventory[itemId].AddStock(StockRequests[op].Quantity);
