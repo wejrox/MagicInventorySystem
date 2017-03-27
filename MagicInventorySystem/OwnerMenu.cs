@@ -117,9 +117,8 @@ namespace MagicInventorySystem
             }
 
             if (StockRequests[op].Quantity < Stock[id].StockLevel)
-                ProcessRequest(op);
+                ProcessRequest(id, op);
             Console.WriteLine(op);
-            ProcessRequest(op);
 
             Console.ReadKey();
         }
@@ -178,24 +177,23 @@ namespace MagicInventorySystem
             }
 
             if (StockRequests[op].Quantity < Stock[id].StockLevel)
-                ProcessRequest(op);
+                ProcessRequest(id, op);
             Console.WriteLine(op);
-            ProcessRequest(op);
         }
 
         // Adds the stock to the shop's inventory stock level
         // Removes from _itemStock StockLevel
-        void ProcessRequest(int stockIndex)
+        void ProcessRequest(int stockIndex, int opSelected)
         {
             // Remove stock from Stock item using stockIndex
             // Add stock to the store's Inventory using the Stock Request item name
             // Save the JSON files for StockRequest and the store that's been updated
 
-            int itemId = StockRequests[op].ItemRequested.Id;
+            int itemId = StockRequests[opSelected].ItemRequested.Id;
 
-            Stores[StockRequests[op].StoreRequesting].StoreInventory[itemId].AddStock(StockRequests[op].Quantity);
-            Stock[itemId].RemoveStock(StockRequests[op].Quantity);
-            StockRequests.RemoveAt(op);
+            Stores[StockRequests[opSelected].StoreRequesting].StoreInventory[itemId].AddStock(StockRequests[opSelected].Quantity);
+            Stock[itemId].RemoveStock(StockRequests[opSelected].Quantity);
+            StockRequests.RemoveAt(opSelected);
         }
 
         void DisplayAllProductLines()
