@@ -22,9 +22,7 @@ namespace MagicInventorySystem
             // Create the menus
             ownerMenu = new OwnerMenu();
             customerMenu = new CustomerMenu();
-            franchiseMenu = new FranchiseMenu();
-
-            
+            franchiseMenu = new FranchiseMenu();            
 
             //Title name
             Title = "Main Menu";
