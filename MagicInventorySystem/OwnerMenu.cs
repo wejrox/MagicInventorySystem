@@ -183,17 +183,28 @@ namespace MagicInventorySystem
 
         // Adds the stock to the shop's inventory stock level
         // Removes from _itemStock StockLevel
-        void ProcessRequest(int stockIndex, int opSelected)
+        void ProcessRequest(int opSelected)
         {
             // Remove stock from Stock item using stockIndex
             // Add stock to the store's Inventory using the Stock Request item name
             // Save the JSON files for StockRequest and the store that's been updated
 
-            int itemId = StockRequests[opSelected].ItemRequested.Id;
+            Item req = StockRequests[opSelected].ItemRequested;
+            int storeId = StockRequests[opSelected].StoreRequesting;
+            int amountToGive = StockRequests[opSelected].Quantity;
+            int itemIndex = -1;
+            for (int i = 0; i < Stores[storeId].StoreInventory.Count; i++)
+            {
+                if (Stores[storeId].StoreInventory[i] == req)
+                    itemIndex = i;
+            }
 
-            Stores[StockRequests[opSelected].StoreRequesting].StoreInventory[itemId].AddStock(StockRequests[opSelected].Quantity);
-            Stock[itemId].RemoveStock(StockRequests[opSelected].Quantity);
+            Stock[opSelected].RemoveStock(amountToGive);
+            Stores[storeId].StoreInventory[itemIndex].AddStock(amountToGive);
             StockRequests.RemoveAt(opSelected);
+
+            JSONUtility.SaveStockRequests(StockRequests);
+            JSONUtility.SaveStoreInventory(Stores[storeId].StoreName, Stores[storeId].StoreInventory);
         }
 
         void DisplayAllProductLines()
