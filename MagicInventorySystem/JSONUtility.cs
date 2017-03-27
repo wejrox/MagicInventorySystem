@@ -89,6 +89,26 @@ namespace MagicInventorySystem
             File.WriteAllText(@"dat\Stock_requests.txt", JsonConvert.SerializeObject(stockRequests, Formatting.Indented));
         }
 
+        // Remove stock request
+        public static void RemoveAndSaveStockRequest(StockRequest sr)
+        {
+            List<StockRequest> stockRequests = new List<StockRequest>();
+            try
+            {
+                stockRequests = JsonConvert.DeserializeObject<List<StockRequest>>(File.ReadAllText(@"dat\Stock_requests.txt"));
+            }
+            catch (Exception) { Console.WriteLine("Error saving Stock Request."); return; }
+
+            // In-case the file is empty
+            if (stockRequests == null)
+                return;
+
+            // Remove the stock request
+            stockRequests.Remove(sr);
+
+            File.WriteAllText(@"dat\Stock_requests.txt", JsonConvert.SerializeObject(stockRequests, Formatting.Indented));
+        }
+
         // Saving stock requests
         public static void SaveStockRequests(List<StockRequest> stockRequests)
         {
