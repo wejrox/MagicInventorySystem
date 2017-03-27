@@ -13,16 +13,16 @@ namespace MagicInventorySystem
     class OwnerMenu : Menu
     {
         // Stock Items (Perhaps make a stock class?)
-        public List<Item> _stock = new List<Item>();
+        List<Item> _stock = new List<Item>();
         // Stores
         public List<Store> _stores { get; private set; }
         // Requests made by stores
         List<StockRequest> _stockRequests = new List<StockRequest>();
- 
+
         // Owners Menu
         string ownerTitle = "(Owner)";
         string[] ownerOptions = { "Display All Stock Requests", "Display Stock Requests (True/False)", "Display All Product Lines" };
-        
+
         string[] franchiseHolderOptions = { "Display Inventory", "Display Inventory (Threshold)", "Add New Inventory Item" };
         // Customer
         string[] customerOptions = { "Display Products", "Display Workshops" };
@@ -44,26 +44,30 @@ namespace MagicInventorySystem
         // The owners menu
         public override void HandleMenu()
         {
-            int op = Formatter.DisplayMenu(ownerTitle, ownerOptions);
-            switch(op)
+            while (ShouldExitMenu == false)
             {
-                case 1:
-                    DisplayAllStockRequests();
-                    break;
-                case 2:
-                    DisplayStockRequests(Formatter.GetBooleanResponse());
-                    break;
-                case 3:
-                    DisplayAllProductLines();
-                    break;
+                int op = DisplayMenu;
+                switch (op)
+                {
+                    case 1:
+                        DisplayAllStockRequests();
+                        break;
+                    case 2:
+                        DisplayStockRequests(Formatter.GetBooleanResponse());
+                        break;
+                    case 3:
+                        DisplayAllProductLines();
+                        break;
+                }
             }
+            //Is this needed? Was here before so I left it.
             Console.ReadKey();
         }
 
         // Prints out all current stock requests
         void DisplayAllStockRequests()
         {
-            string[] headers = { "Request ID", "Store ID", "Product", "Quantity", "Current Stock", "Available" };
+            string[] headers = { "Request ID", "Store", "Product", "Quantity", "Current Stock", "Available" };
 
             // Generate heading
             string heading = "";
@@ -83,7 +87,7 @@ namespace MagicInventorySystem
                 string y = "";
                 bool available = ir.Quantity < ir.ItemRequested.StockLevel;
                 y += string.Format("{0,10}", ir.Id);
-                y += string.Format("{0,15}", ir.StoreRequesting);
+                y += string.Format("{0,15}", ir.StoreRequesting.StoreName);
                 y += string.Format("{0,17}", ir.ItemRequested.Name);
                 y += string.Format("{0,17}", ir.Quantity);
                 y += string.Format("{0,17}", ir.ItemRequested.StockLevel);
@@ -96,7 +100,7 @@ namespace MagicInventorySystem
 
             Console.ReadKey();
         }
-        
+
         // Prints out stock requests with availabiity matching parameter
         void DisplayStockRequests(bool available)
         {
@@ -122,7 +126,7 @@ namespace MagicInventorySystem
                 if (_available == available)
                 {
                     y += string.Format("{0,10}", ir.Id);
-                    y += string.Format("{0,15}", ir.StoreRequesting);
+                    y += string.Format("{0,15}", ir.StoreRequesting.StoreName);
                     y += string.Format("{0,17}", ir.ItemRequested.Name);
                     y += string.Format("{0,17}", ir.Quantity);
                     y += string.Format("{0,17}", ir.ItemRequested.StockLevel);
@@ -141,7 +145,7 @@ namespace MagicInventorySystem
         // Removes from _itemStock StockLevel
         void ProcessRequest(int op)
         {
-            int storeId = _stockRequests[op].StoreRequesting;
+            int storeId = _stockRequests[op].StoreRequesting.Id;
             int itemId = _stockRequests[op].ItemRequested.Id;
             Console.WriteLine(storeId + " " + itemId);
 
@@ -152,13 +156,35 @@ namespace MagicInventorySystem
 
         void DisplayAllProductLines()
         {
+            string[] headers = { "ID", "Product", "Current Stock" };
 
+            //Generate heading
+            string heading = "";
+
+            //Generate heading
+            heading += string.Format("{0,10", headers[0]);
+            heading += string.Format("{0,15", headers[1]);
+            heading += string.Format("{0,17", headers[2]);
+
+            List<string> formattedData = new List<string>();
+            //Generate each line 
+            foreach (StockRequest ir in _item)
+            {
+                string y = "";
+                bool _available = ir.Quantity < ir.ItemRequested.StockLevel;
+                if (_available == available)
+                {
+                    y += string.Format("{0,10}", ir.Id);
+                    y += string.Format("{0,15}", ir.ItemRequested.Name);
+                    y += string.Format("{0,17}", ir.ItemRequested.StockLevel);
+
+                    formattedData.Add(y);
+                }
+            }
+
+            int op = Formatter.DisplayTable("Current Stock", heading, formattedData);
+            Console.WriteLine(op);
+            ProcessRequest(op);
         }
-
-        public void AddStockRequest(StockRequest sr)
-        {
-
-        }
-        
     }
 }
