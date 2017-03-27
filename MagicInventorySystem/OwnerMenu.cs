@@ -20,15 +20,15 @@ namespace MagicInventorySystem
         List<StockRequest> _stockRequests = new List<StockRequest>();
 
         // Owners Menu
-        string ownerTitle = "(Owner)";
-        string[] ownerOptions = { "Display All Stock Requests", "Display Stock Requests (True/False)", "Display All Product Lines" };
-
-        string[] franchiseHolderOptions = { "Display Inventory", "Display Inventory (Threshold)", "Add New Inventory Item" };
-        // Customer
-        string[] customerOptions = { "Display Products", "Display Workshops" };
-
         public OwnerMenu()
         {
+            Title = "Owner Menu";
+            Options = new List<string>
+            {
+                "Display All Stock Requests",
+                "Display Stock Requests (True/False)",
+                "Display All Product Lines"
+            };
             _stock = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(@"dat\Owners_inventory.txt"));
             _stockRequests = JsonConvert.DeserializeObject<List<StockRequest>>(File.ReadAllText(@"dat\Stock_requests.txt"));
             // Initialise stores
@@ -147,7 +147,7 @@ namespace MagicInventorySystem
         {
             int itemId = _stockRequests[op].ItemRequested.Id;
 
-            _stores[StockRequest[op].StoreRequesting].StoreInventory[itemId].AddStock(_stockRequests[op].Quantity);
+            _stores[_stockRequests[op].StoreRequesting].StoreInventory[itemId].AddStock(_stockRequests[op].Quantity);
             _stock[itemId].RemoveStock(_stockRequests[op].Quantity);
             _stockRequests.RemoveAt(op);
         }
@@ -160,21 +160,20 @@ namespace MagicInventorySystem
             string heading = "";
 
             //Generate heading
-            heading += string.Format("{0,10", headers[0]);
-            heading += string.Format("{0,15", headers[1]);
-            heading += string.Format("{0,17", headers[2]);
+            heading += string.Format("{0,10}", headers[0]);
+            heading += string.Format("{0,15}", headers[1]);
+            heading += string.Format("{0,17}", headers[2]);
 
             List<string> formattedData = new List<string>();
             //Generate each line 
-            foreach (StockRequest ir in _item)
+            if(_stock != null)
             {
-                string y = "";
-                bool _available = ir.Quantity < ir.ItemRequested.StockLevel;
-                if (_available == available)
+                for (int i = 0; i < _stock.Count; i++)
                 {
-                    y += string.Format("{0,10}", ir.Id);
-                    y += string.Format("{0,15}", ir.ItemRequested.Name);
-                    y += string.Format("{0,17}", ir.ItemRequested.StockLevel);
+                    string y = "";
+                    y += string.Format("{0,10}", i);
+                    y += string.Format("{0,15}", _stock[i].Name);
+                    y += string.Format("{0,17}", _stock[i].StockLevel);
 
                     formattedData.Add(y);
                 }
