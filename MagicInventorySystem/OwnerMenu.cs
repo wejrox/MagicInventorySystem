@@ -234,9 +234,8 @@ namespace MagicInventorySystem
                 }
             }
 
-            int op = DisplayTable("Current Stock", heading, formattedData);
+            DisplayTable("Current Stock", heading, formattedData);
             Console.WriteLine(op);
-            ProcessRequest(op);
         }
 
         // Table for OwnerMenu
