@@ -55,7 +55,7 @@ namespace MagicInventorySystem
             List<StockRequest> stock = null;
             try
             {
-                stock = JsonConvert.DeserializeObject<List<StockRequest>>(File.ReadAllText(@"dat\Stock_requests_inventory.txt"));
+                stock = JsonConvert.DeserializeObject<List<StockRequest>>(File.ReadAllText(@"dat\Stock_requests.txt"));
             }
             catch (Exception) { Console.WriteLine("Error reading data for 'Stock Requests'. Please re-load the application."); }
 
