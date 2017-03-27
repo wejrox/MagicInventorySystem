@@ -55,8 +55,8 @@ namespace MagicInventorySystem
             switch (op)
             {
                 case 1:
-                    //ownerMenu = new OwnerMenu(); // Initialize when used
-                    //ownerMenu.HandleMenu();
+                    ownerMenu = new OwnerMenu(); // Initialize when used
+                    ownerMenu.HandleMenu();
                     break;
                 case 2:
                     franchiseMenu = new FranchiseMenu(); // Initialize when used
