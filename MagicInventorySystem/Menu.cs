@@ -25,7 +25,7 @@ namespace MagicInventorySystem
         public abstract void HandleMenu();
 
         // Display a menu and return the option chosen
-        // Takes a title, and the options to choose from
+        // Displays the options created in the constructor
         public int DisplayMenu()
         {
             // Set up for the menu
@@ -60,7 +60,7 @@ namespace MagicInventorySystem
             return option;
         }
 
-        // Get the integer equivalent of the option selected
+        // Get the integer equivalent of the string option entered
         public int GetIntOptionSelected()
         {
             int opt = -1;
@@ -91,7 +91,39 @@ namespace MagicInventorySystem
             return opt;
         }
 
+        // Gets a boolean response from the user
+        public bool GetBooleanResponse()
+        {
+            Console.WriteLine("True/False?");
+            string response = "";
+            bool bResponse = false;
 
+            while (response.ToLower() != "t" && response.ToLower() != "true" &&
+                    response.ToLower() != "f" && response.ToLower() != "false")
+            {
+                try
+                {
+                    response = Console.ReadLine();
+
+                    if (response.ToLower() != "t" && response.ToLower() != "true" &&
+                    response.ToLower() != "f" && response.ToLower() != "false")
+                    {
+                        Console.WriteLine("\'{0}\' is not a valid option. Please enter \'T/True/true/TRUE\' or \'F/False/false/FALSE\'.", response);
+                    }
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("\'{0}\' is not a valid option. Please enter \'T/True/true/TRUE\' or \'F/False/false/FALSE\'.", response);
+                }
+            }
+
+            if (response.ToLower() == "t" || response.ToLower() == "true")
+                bResponse = true;
+            else if (response.ToLower() == "f" || response.ToLower() == "false")
+                bResponse = false;
+
+            return bResponse;
+        }
     }
 }
 
