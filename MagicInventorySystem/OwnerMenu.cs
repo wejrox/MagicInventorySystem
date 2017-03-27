@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
-using Newtonsoft.Json;
 using System.Runtime.Serialization;
 using System.Web;
 
@@ -13,32 +11,33 @@ namespace MagicInventorySystem
     class OwnerMenu : Menu
     {
         // Stock Items (Perhaps make a stock class?)
-        List<Item> _stock = new List<Item>();
+        List<Item> Stock = new List<Item>();
         // Stores
-        public List<Store> _stores { get; private set; }
+        public List<Store> Stores { get; private set; }
         // Requests made by stores
-        List<StockRequest> _stockRequests = new List<StockRequest>();
+        List<StockRequest> StockRequests = new List<StockRequest>();
 
         // Owners Menu
-        public OwnerMenu()
+        public OwnerMenu() : base()
         {
             Title = "Owner Menu";
             Options = new List<string>
             {
                 "Display All Stock Requests",
                 "Display Stock Requests (True/False)",
-                "Display All Product Lines"
+                "Display All Product Lines",
+                "Return to Main Menu",
+                "Exit"
             };
-            _stock = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(@"dat\Owners_inventory.txt"));
-            _stockRequests = JsonConvert.DeserializeObject<List<StockRequest>>(File.ReadAllText(@"dat\Stock_requests.txt"));
-            // Initialise stores
-            _stores = new List<Store> {
+
+            Stock = JSONUtility.GetInventory("Owners");
+            Stores = new List<Store> {
                 new Store("Olinda"),
                 new Store("Springvale"),
                 new Store("Altona"),
                 new Store("Melbourne"),
-                new Store("Epping")
-            };
+                new Store("Epping")};
+            StockRequests = JSONUtility.GetStockRequests();
         }
 
         // The owners menu
@@ -58,10 +57,13 @@ namespace MagicInventorySystem
                     case 3:
                         DisplayAllProductLines();
                         break;
+                    case 4:
+                        return;
+                    case 5:
+                        Environment.Exit(0);
+                        break;
                 }
             }
-            //Is this needed? Was here before so I left it.
-            Console.ReadKey();
         }
 
         // Prints out all current stock requests
@@ -82,12 +84,12 @@ namespace MagicInventorySystem
 
             List<string> formattedData = new List<string>();
             // Generate each line
-            foreach (StockRequest sr in _stockRequests)
+            foreach (StockRequest sr in StockRequests)
             {
                 string y = "";
                 bool available = sr.Quantity < sr.ItemRequested.StockLevel;
                 y += string.Format("{0,10}", sr.Id);
-                y += string.Format("{0,15}", _stores[sr.StoreRequesting].StoreName);
+                y += string.Format("{0,15}", Stores[sr.StoreRequesting].StoreName);
                 y += string.Format("{0,17}", sr.ItemRequested.Name);
                 y += string.Format("{0,17}", sr.Quantity);
                 y += string.Format("{0,17}", sr.ItemRequested.StockLevel);
@@ -119,14 +121,14 @@ namespace MagicInventorySystem
 
             List<string> formattedData = new List<string>();
             // Generate each line
-            foreach (StockRequest sr in _stockRequests)
+            foreach (StockRequest sr in StockRequests)
             {
                 string y = "";
                 bool _available = sr.Quantity < sr.ItemRequested.StockLevel;
                 if (_available == available)
                 {
                     y += string.Format("{0,10}", sr.Id);
-                    y += string.Format("{0,15}", _stores[sr.StoreRequesting].StoreName);
+                    y += string.Format("{0,15}", Stores[sr.StoreRequesting].StoreName);
                     y += string.Format("{0,17}", sr.ItemRequested.Name);
                     y += string.Format("{0,17}", sr.Quantity);
                     y += string.Format("{0,17}", sr.ItemRequested.StockLevel);
@@ -137,6 +139,25 @@ namespace MagicInventorySystem
             }
 
             int op = DisplayTable("Current Stock", heading, formattedData);
+
+            //Data Validation
+            int id = -1;
+
+            for (int i = 0; i < Stock.Count; i++)
+            {
+                if (Stock[i].Name == StockRequests[op].ItemRequested.Name)
+                    id = i;
+            }
+
+            if (id == -1)
+            {
+                Console.WriteLine("Item selected doesn't exist in Owner inventory");
+                Console.ReadKey();
+                return;
+            }
+
+            if (StockRequests[op].Quantity < Stock[id].StockLevel)
+                ProcessRequest(op);
             Console.WriteLine(op);
             ProcessRequest(op);
         }
@@ -145,11 +166,11 @@ namespace MagicInventorySystem
         // Removes from _itemStock StockLevel
         void ProcessRequest(int op)
         {
-            int itemId = _stockRequests[op].ItemRequested.Id;
+            int itemId = StockRequests[op].ItemRequested.Id;
 
-            _stores[_stockRequests[op].StoreRequesting].StoreInventory[itemId].AddStock(_stockRequests[op].Quantity);
-            _stock[itemId].RemoveStock(_stockRequests[op].Quantity);
-            _stockRequests.RemoveAt(op);
+            Stores[StockRequests[op].StoreRequesting].StoreInventory[itemId].AddStock(StockRequests[op].Quantity);
+            Stock[itemId].RemoveStock(StockRequests[op].Quantity);
+            StockRequests.RemoveAt(op);
         }
 
         void DisplayAllProductLines()
@@ -166,14 +187,14 @@ namespace MagicInventorySystem
 
             List<string> formattedData = new List<string>();
             //Generate each line 
-            if(_stock != null)
+            if(Stock != null)
             {
-                for (int i = 0; i < _stock.Count; i++)
+                for (int i = 0; i < Stock.Count; i++)
                 {
                     string y = "";
                     y += string.Format("{0,10}", i);
-                    y += string.Format("{0,15}", _stock[i].Name);
-                    y += string.Format("{0,17}", _stock[i].StockLevel);
+                    y += string.Format("{0,15}", Stock[i].Name);
+                    y += string.Format("{0,17}", Stock[i].StockLevel);
 
                     formattedData.Add(y);
                 }

@@ -60,12 +60,12 @@ namespace MagicInventorySystem
                     break;
                 case 2:
                     franchiseMenu = new FranchiseMenu(); // Initialize when used
-                    franchiseMenu.SelectStore(ownerMenu._stores);
+                    franchiseMenu.SelectStore(ownerMenu.Stores);
                     franchiseMenu.HandleMenu();
                     break;
                 case 3:
                     customerMenu = new CustomerMenu(); // Initialize when used
-                    customerMenu.SelectStore(ownerMenu._stores);
+                    customerMenu.SelectStore(ownerMenu.Stores);
                     customerMenu.HandleMenu();
                     break;
                 case 4:
