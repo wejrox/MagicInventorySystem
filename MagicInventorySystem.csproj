@@ -50,7 +50,6 @@
   <ItemGroup>
     <Compile Include="CustomerMenu.cs" />
     <Compile Include="CustomerOrder.cs" />
-    <Compile Include="Formatter.cs" />
     <Compile Include="FranchiseMenu.cs" />
     <Compile Include="Driver.cs" />
     <Compile Include="IMenu.cs" />
