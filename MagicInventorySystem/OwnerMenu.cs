@@ -46,14 +46,14 @@ namespace MagicInventorySystem
         {
             while (ShouldExitMenu == false)
             {
-                int op = DisplayMenu;
+                int op = DisplayMenu();
                 switch (op)
                 {
                     case 1:
                         DisplayAllStockRequests();
                         break;
                     case 2:
-                        DisplayStockRequests(Formatter.GetBooleanResponse());
+                        DisplayStockRequests(GetBooleanResponse());
                         break;
                     case 3:
                         DisplayAllProductLines();
@@ -82,21 +82,21 @@ namespace MagicInventorySystem
 
             List<string> formattedData = new List<string>();
             // Generate each line
-            foreach (StockRequest ir in _stockRequests)
+            foreach (StockRequest sr in _stockRequests)
             {
                 string y = "";
-                bool available = ir.Quantity < ir.ItemRequested.StockLevel;
-                y += string.Format("{0,10}", ir.Id);
-                y += string.Format("{0,15}", ir.StoreRequesting.StoreName);
-                y += string.Format("{0,17}", ir.ItemRequested.Name);
-                y += string.Format("{0,17}", ir.Quantity);
-                y += string.Format("{0,17}", ir.ItemRequested.StockLevel);
+                bool available = sr.Quantity < sr.ItemRequested.StockLevel;
+                y += string.Format("{0,10}", sr.Id);
+                y += string.Format("{0,15}", _stores[sr.StoreRequesting].StoreName);
+                y += string.Format("{0,17}", sr.ItemRequested.Name);
+                y += string.Format("{0,17}", sr.Quantity);
+                y += string.Format("{0,17}", sr.ItemRequested.StockLevel);
                 y += string.Format("{0,17}", available);
 
                 formattedData.Add(y);
             }
 
-            Formatter.DisplayTable("Current Stock", heading, formattedData);
+            DisplayTable("Current Stock", heading, formattedData);
 
             Console.ReadKey();
         }
@@ -119,24 +119,24 @@ namespace MagicInventorySystem
 
             List<string> formattedData = new List<string>();
             // Generate each line
-            foreach (StockRequest ir in _stockRequests)
+            foreach (StockRequest sr in _stockRequests)
             {
                 string y = "";
-                bool _available = ir.Quantity < ir.ItemRequested.StockLevel;
+                bool _available = sr.Quantity < sr.ItemRequested.StockLevel;
                 if (_available == available)
                 {
-                    y += string.Format("{0,10}", ir.Id);
-                    y += string.Format("{0,15}", ir.StoreRequesting.StoreName);
-                    y += string.Format("{0,17}", ir.ItemRequested.Name);
-                    y += string.Format("{0,17}", ir.Quantity);
-                    y += string.Format("{0,17}", ir.ItemRequested.StockLevel);
+                    y += string.Format("{0,10}", sr.Id);
+                    y += string.Format("{0,15}", _stores[sr.StoreRequesting].StoreName);
+                    y += string.Format("{0,17}", sr.ItemRequested.Name);
+                    y += string.Format("{0,17}", sr.Quantity);
+                    y += string.Format("{0,17}", sr.ItemRequested.StockLevel);
                     y += string.Format("{0,17}", available);
 
                     formattedData.Add(y);
                 }
             }
 
-            int op = Formatter.DisplayTable("Current Stock", heading, formattedData);
+            int op = DisplayTable("Current Stock", heading, formattedData);
             Console.WriteLine(op);
             ProcessRequest(op);
         }
@@ -182,9 +182,47 @@ namespace MagicInventorySystem
                 }
             }
 
-            int op = Formatter.DisplayTable("Current Stock", heading, formattedData);
+            int op = DisplayTable("Current Stock", heading, formattedData);
             Console.WriteLine(op);
             ProcessRequest(op);
+        }
+
+        // Table for OwnerMenu
+        // Displays a table using the data given
+        int DisplayTable(string title, string heading, List<string> formattedData)
+        {
+            int option = -1;
+            // Generate the title
+            Console.WriteLine("======================================");
+            Console.WriteLine(title);
+            Console.WriteLine("======================================");
+            Console.WriteLine();
+
+            // Print heading
+            Console.WriteLine(heading);
+            // Print each line
+            foreach (string s in formattedData)
+                Console.WriteLine(s);
+
+            Console.WriteLine();
+            Console.WriteLine("Enter a request to process: ");
+
+            string op = "";
+            try
+            {
+                op = "" + Console.ReadKey().KeyChar;
+                Console.WriteLine();
+                Console.WriteLine();
+                option = int.Parse(op);
+                if (option < 0 || option > formattedData.Count + 1)
+                    Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 1 to {1}.", op, formattedData.Count + 1);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 1 to {1}.", op, formattedData.Count + 1);
+            }
+
+            return option;
         }
     }
 }

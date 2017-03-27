@@ -124,44 +124,6 @@ namespace MagicInventorySystem
 
             return bResponse;
         }
-
-        // Table for OwnerMenu
-        // Displays a table using the data given
-        int DisplayTable(string title, string heading, List<string> formattedData)
-        {
-            int option = -1;
-            // Generate the title
-            Console.WriteLine("======================================");
-            Console.WriteLine(title);
-            Console.WriteLine("======================================");
-            Console.WriteLine();
-
-            // Print heading
-            Console.WriteLine(heading);
-            // Print each line
-            foreach (string s in formattedData)
-                Console.WriteLine(s);
-
-            Console.WriteLine();
-            Console.WriteLine("Enter a request to process: ");
-
-            string op = "";
-            try
-            {
-                op = "" + Console.ReadKey().KeyChar;
-                Console.WriteLine();
-                Console.WriteLine();
-                option = int.Parse(op);
-                if (option < 0 || option > formattedData.Count + 1)
-                    Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 1 to {1}.", op, formattedData.Count + 1);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 1 to {1}.", op, formattedData.Count + 1);
-            }
-
-            return option;
-        }
     }
 }
 
