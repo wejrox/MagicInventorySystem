@@ -145,11 +145,9 @@ namespace MagicInventorySystem
         // Removes from _itemStock StockLevel
         void ProcessRequest(int op)
         {
-            int storeId = _stockRequests[op].StoreRequesting.Id;
             int itemId = _stockRequests[op].ItemRequested.Id;
-            Console.WriteLine(storeId + " " + itemId);
 
-            _stores[storeId].StoreInventory[itemId].AddStock(_stockRequests[op].Quantity);
+            _stores[StockRequest[op].StoreRequesting].StoreInventory[itemId].AddStock(_stockRequests[op].Quantity);
             _stock[itemId].RemoveStock(_stockRequests[op].Quantity);
             _stockRequests.RemoveAt(op);
         }
