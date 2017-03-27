@@ -18,12 +18,12 @@ namespace MagicInventorySystem
         {
             // Initialize the JSON files if they don't exist
             JSONUtility.InitializeJSONFiles();
-
+            /*
             // Create the menus
             ownerMenu = new OwnerMenu();
             customerMenu = new CustomerMenu();
             franchiseMenu = new FranchiseMenu();            
-
+            */
             //Title name
             Title = "Main Menu";
             Options = new List<string> {
