@@ -96,12 +96,12 @@ namespace MagicInventorySystem
             foreach (StockRequest sr in StockRequests)
             {
                 string y = "";
-                bool available = sr.Quantity < sr.ItemRequested.StockLevel;
+                bool available = sr.Quantity <= Stock[sr.ItemRequested.Id].StockLevel;
                 y += string.Format("{0,10}", sr.Id);
                 y += string.Format("{0,15}", Stores[sr.StoreRequesting].StoreName);
                 y += string.Format("{0,17}", sr.ItemRequested.Name);
                 y += string.Format("{0,17}", sr.Quantity);
-                y += string.Format("{0,17}", sr.ItemRequested.StockLevel);
+                y += string.Format("{0,17}", Stock[sr.ItemRequested.Id].StockLevel);
                 y += string.Format("{0,17}", available);
 
                 formattedData.Add(y);
@@ -112,7 +112,7 @@ namespace MagicInventorySystem
             if (op == -2)
                 return;
 
-            //Data Validation
+            // Data Validation
             int id = -1;
             for (int i = 0; i < Stock.Count; i++)
             {
@@ -127,8 +127,11 @@ namespace MagicInventorySystem
                 return;
             }
 
-            if (StockRequests[op].Quantity < Stock[id].StockLevel)
+            if (StockRequests[op].Quantity <= Stock[id].StockLevel)
                 ProcessRequest(op);
+            else
+                Console.WriteLine("Cannot process request as there is not enough stock");
+
             Console.WriteLine(op);
 
             Console.ReadKey();
@@ -137,6 +140,7 @@ namespace MagicInventorySystem
         // Prints out stock requests with availabiity matching parameter
         void DisplayStockRequests(bool available)
         {
+            StockRequests = JSONUtility.GetStockRequests();
             if (StockRequests?.Any() != true)
             {
                 Console.WriteLine("There are no stock requests to process. Press any key to return to the previous menu.");
@@ -159,17 +163,18 @@ namespace MagicInventorySystem
 
             List<string> formattedData = new List<string>();
             // Generate each line
-            foreach (StockRequest sr in StockRequests)
+            // Uses for loop as we need i for the id to handle, as StockRequests.Id is unique
+            for (int i = 0; i < StockRequests.Count; i++)
             {
                 string y = "";
-                bool _available = sr.Quantity < sr.ItemRequested.StockLevel;
+                bool _available = StockRequests[i].Quantity < StockRequests[i].ItemRequested.StockLevel;
                 if (_available == available)
                 {
-                    y += string.Format("{0,10}", sr.Id);
-                    y += string.Format("{0,15}", Stores[sr.StoreRequesting].StoreName);
-                    y += string.Format("{0,17}", sr.ItemRequested.Name);
-                    y += string.Format("{0,17}", sr.Quantity);
-                    y += string.Format("{0,17}", sr.ItemRequested.StockLevel);
+                    y += string.Format("{0,10}", i);
+                    y += string.Format("{0,15}", Stores[StockRequests[i].StoreRequesting].StoreName);
+                    y += string.Format("{0,17}", StockRequests[i].ItemRequested.Name);
+                    y += string.Format("{0,17}", StockRequests[i].Quantity);
+                    y += string.Format("{0,17}", StockRequests[i].ItemRequested.StockLevel);
                     y += string.Format("{0,17}", available);
 
                     formattedData.Add(y);
@@ -201,30 +206,60 @@ namespace MagicInventorySystem
             Console.WriteLine(op);
         }
 
-        // Adds the stock to the shop's inventory stock level
         // Removes from _itemStock StockLevel
+        // Adds the stock to the shop's inventory stock level
+        // Delete stock request
+        // Updates inventory files
+        // Doesn't need nullchecks as it has been performed before the function is called
         void ProcessRequest(int opSelected)
-        {
+        {            
             // Remove stock from Stock item using stockIndex
             // Add stock to the store's Inventory using the Stock Request item name
             // Save the JSON files for StockRequest and the store that's been updated
-
             Item req = StockRequests[opSelected].ItemRequested;
             int storeId = StockRequests[opSelected].StoreRequesting;
             int amountToGive = StockRequests[opSelected].Quantity;
             int itemIndex = -1;
+
+            // Get the item index 
             for (int i = 0; i < Stores[storeId].StoreInventory.Count; i++)
             {
-                if (Stores[storeId].StoreInventory[i] == req)
+                // Name must match
+                if (Stores[storeId].StoreInventory[i].Name == req.Name)
                     itemIndex = i;
             }
 
-            Stock[opSelected].RemoveStock(amountToGive);
-            Stores[storeId].StoreInventory[itemIndex].AddStock(amountToGive);
-            StockRequests.RemoveAt(opSelected);
+            if(itemIndex == -1)
+            {
+                Console.WriteLine("Item selected doesn't exist in your stock list, press any key to cancel.");
+                Console.ReadKey();
+                return;
+            }
+
+            try
+            {
+                // Remove from owner stock
+                Stock[opSelected].RemoveStock(amountToGive);
+
+                // Add stock to store requesting
+                Stores[storeId].StoreInventory[itemIndex].AddStock(amountToGive);
+
+                // Delete stock requests
+                StockRequests.RemoveAt(opSelected);
+            }
+            catch
+            {
+                Console.WriteLine("Something unexpected went wrong applying the stock update, aborting. Press any key to continue.");
+                Console.ReadKey();
+                return;
+            }
 
             JSONUtility.SaveStockRequests(StockRequests);
             JSONUtility.SaveStoreInventory(Stores[storeId].StoreName, Stores[storeId].StoreInventory);
+
+            // Notify user of successs
+            Console.WriteLine("Stock request has successfully been handled. Press any key to return to the previous menu.");
+            Console.ReadKey();
         }
 
         void DisplayAllProductLines()

@@ -57,6 +57,13 @@ namespace MagicInventorySystem
         // Displays the inventory, prompts for threshold for restock, prompts for threshold filter if required
         public void DisplayInventory(bool hasThreshold)
         {
+            if (CurStore.StoreInventory?.Any() != true)
+            {
+                Console.WriteLine("No inventory available for this store. Press any key to return to the previous menu.");
+                Console.ReadKey();
+                return;
+            }
+
             // Get Threshold
             Console.WriteLine("How low can an item's stock-level be before restocking? \n(type c or cancel to return to the previous menu)");
             int threshold = -1;
@@ -169,6 +176,13 @@ namespace MagicInventorySystem
         public void AddNewInventoryItem()
         {
             List<Item> ownerStock = JSONUtility.GetInventory("Owners");
+
+            if (ownerStock?.Any() != true)
+            {
+                Console.WriteLine("Owner has no stock available to add. Press any key to return to the previous menu.");
+                Console.ReadKey();
+                return;
+            }
 
             // Headings
             Console.WriteLine("======================================");

@@ -18,12 +18,10 @@ namespace MagicInventorySystem
         {
             // Initialize the JSON files if they don't exist
             JSONUtility.InitializeJSONFiles();
-            /*
-            // Create the menus
+            
+            // Create the owner menu as Franchise depends on it
             ownerMenu = new OwnerMenu();
-            customerMenu = new CustomerMenu();
-            franchiseMenu = new FranchiseMenu();            
-            */
+
             //Title name
             Title = "Main Menu";
             Options = new List<string> {
@@ -60,7 +58,6 @@ namespace MagicInventorySystem
             switch (op)
             {
                 case 1:
-                    ownerMenu = new OwnerMenu(); // Initialize when used
                     ownerMenu.HandleMenu();
                     break;
                 case 2:
