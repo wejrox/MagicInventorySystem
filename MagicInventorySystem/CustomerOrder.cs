@@ -90,11 +90,12 @@ namespace MagicInventorySystem
                 workshopsTitle = "Workshops Booked\n";
                 workshopsTitle += "--------------------------------------";
                 // Set workshop header
-                workshopsHeader = String.Format("{0, 20} {1, 20}", "Workshop Time", "Store Name");
+                workshopsHeader = String.Format("{0, 20} {1, 20} {2,20}", "Workshop Time", "Store Name", "Booking ID");
                 // Add workshops
                 for (int i = 0; i < Workshops.Count; i++)
                 {
-                    workshops += String.Format("{0, 20} {1, 20}", Workshops[i].WorkshopTime, StoreName);
+                    workshops += String.Format("{0, 20} {1, 20} {2,20}", Workshops[i].WorkshopTime, StoreName, Workshops[i].GetBookingId());
+                    workshops += "\n";
                 }
             }
 

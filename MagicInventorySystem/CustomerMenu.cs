@@ -35,7 +35,6 @@ namespace MagicInventorySystem
             DisplayOptionsText = "[Legend: 'P' Next Page | 'R' Return to Menu | 'C' Complete Transaction] \nEnter Item Number to Purchase or Function";
             PagingKeys = new char[] { 'P', 'p', 'R', 'r', 'C', 'c' };
             ItemsPerPage = 5;
-            _CustomerOrder = new CustomerOrder();
         }
 
         // Handles the menu display
@@ -289,6 +288,8 @@ namespace MagicInventorySystem
             while (op < 0 || op > CurStore.Workshops.Count - 1)
             {
                 op = GetIntOptionSelected();
+                if (op == -2)
+                    return;
                 if (op < 0 || op > CurStore.Workshops.Count - 1)
                     Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 0 to {1}.", op, CurStore.Workshops.Count - 1);
             }
@@ -414,6 +415,7 @@ namespace MagicInventorySystem
 
             CurStore = stores[option - 1];
             Title = "Customer Menu (" + CurStore.StoreName + ")";
+            _CustomerOrder = new CustomerOrder(CurStore.StoreName);
         }
     }
 }

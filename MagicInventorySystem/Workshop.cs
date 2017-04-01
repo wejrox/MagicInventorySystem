@@ -9,6 +9,7 @@ namespace MagicInventorySystem
 {
     public class Workshop
     {
+        static int NextBookingID = 0;
         [JsonProperty]
         public int MaxWorkshopParticipants { get; private set; }
         [JsonProperty]
@@ -16,11 +17,15 @@ namespace MagicInventorySystem
         [JsonProperty]
         public string WorkshopTime { get; private set; }
 
+        public int BookingID { get; private set; }
+
         public Workshop(int maxWorkshopParticipants, string workshopTime)
         {
             MaxWorkshopParticipants = maxWorkshopParticipants;
             CurWorkshopParticipants = 0;
             WorkshopTime = workshopTime;
+
+            NextBookingID = 0;
         }
 
         // Tries to add a workshop participant, returns whether or not it was successful
@@ -33,6 +38,12 @@ namespace MagicInventorySystem
             }
             else
                 return false;
+        }
+
+        public int GetBookingId()
+        {
+            BookingID = NextBookingID++;
+            return BookingID;
         }
     }
 }
