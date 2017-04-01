@@ -71,6 +71,13 @@ namespace MagicInventorySystem
         // Prints out all current stock requests
         void DisplayAllStockRequests()
         {
+            if (StockRequests?.Any() == true)
+            {
+                Console.WriteLine("There are no stock requests to process. Press any key to return to the previous menu.");
+                Console.ReadKey();
+                return;
+            }
+
             string[] headers = { "Request ID", "Store", "Product", "Quantity", "Current Stock", "Available" };
 
             // Generate heading
@@ -86,30 +93,27 @@ namespace MagicInventorySystem
 
             List<string> formattedData = new List<string>();
             // Generate each line
-            if (StockRequests != null && StockRequests.Count > 0)
+            foreach (StockRequest sr in StockRequests)
             {
-                foreach (StockRequest sr in StockRequests)
-                {
-                    string y = "";
-                    bool available = sr.Quantity < sr.ItemRequested.StockLevel;
-                    y += string.Format("{0,10}", sr.Id);
-                    y += string.Format("{0,15}", Stores[sr.StoreRequesting].StoreName);
-                    y += string.Format("{0,17}", sr.ItemRequested.Name);
-                    y += string.Format("{0,17}", sr.Quantity);
-                    y += string.Format("{0,17}", sr.ItemRequested.StockLevel);
-                    y += string.Format("{0,17}", available);
+                string y = "";
+                bool available = sr.Quantity < sr.ItemRequested.StockLevel;
+                y += string.Format("{0,10}", sr.Id);
+                y += string.Format("{0,15}", Stores[sr.StoreRequesting].StoreName);
+                y += string.Format("{0,17}", sr.ItemRequested.Name);
+                y += string.Format("{0,17}", sr.Quantity);
+                y += string.Format("{0,17}", sr.ItemRequested.StockLevel);
+                y += string.Format("{0,17}", available);
 
-                    formattedData.Add(y);
-                }
+                formattedData.Add(y);
             }
 
             int op = DisplayTable("Current Stock", heading, formattedData);
             // Cancel
             if (op == -2)
                 return;
+
             //Data Validation
             int id = -1;
-
             for (int i = 0; i < Stock.Count; i++)
             {
                 if (Stock[i].Name == StockRequests[op].ItemRequested.Name)
@@ -133,6 +137,13 @@ namespace MagicInventorySystem
         // Prints out stock requests with availabiity matching parameter
         void DisplayStockRequests(bool available)
         {
+            if (StockRequests?.Any() == true)
+            {
+                Console.WriteLine("There are no stock requests to process. Press any key to return to the previous menu.");
+                Console.ReadKey();
+                return;
+            }
+
             string[] headers = { "Request ID", "Store", "Product", "Quantity", "Current Stock", "Available" };
 
             // Generate heading

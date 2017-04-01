@@ -38,6 +38,11 @@ namespace MagicInventorySystem
 
         public void Run()
         {
+            // Set Window size
+            Console.WindowHeight = 45;
+            Console.BufferHeight = 45;
+            Console.WindowWidth = 100;
+            Console.BufferWidth = 100;
             // Run forever, as the user can exit in the menu
             while (true)
             {
