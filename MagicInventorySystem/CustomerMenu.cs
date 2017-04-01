@@ -293,8 +293,7 @@ namespace MagicInventorySystem
                     Console.WriteLine("\'{0}\' is not a valid option", op);
             }
 
-            HandleWorkshopBooking(op);
-            }          
+            HandleWorkshopBooking(op);        
         }
 
         // Adds the item selected to the current order, and the quantity
@@ -303,7 +302,7 @@ namespace MagicInventorySystem
             try
             {
                 _CustomerOrder.AddItem(CurStore.StoreInventory[index], quantity);
-                CurStore.StoreInventory[index].RemoveStock()
+                CurStore.StoreInventory[index].RemoveStock(quantity);
             }
             // Should never happen, but just in-case
             catch (Exception e) { Console.WriteLine("Could not add item \'{0}\' to your order.", index);  Debug.Write(e.StackTrace);  return; }
@@ -318,6 +317,7 @@ namespace MagicInventorySystem
                 {
                     _CustomerOrder.Workshops.Add(CurStore.Workshops[index]);
                     _CustomerOrder.BookedIntoWorkshop = true;
+                    CurStore.Workshops[index].AddWorkshopParticipant();
                 }
                 // Should never happen, but just in-case
                 catch (Exception) { Console.WriteLine("Could not book you into workshop \'{0}\'.", index); }
