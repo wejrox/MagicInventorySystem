@@ -278,7 +278,7 @@ namespace MagicInventorySystem
 
             //Generate heading
             heading += string.Format("{0,10}", headers[0]);
-            heading += string.Format("{0,15}", headers[1]);
+            heading += string.Format("{0,25}", headers[1]);
             heading += string.Format("{0,17}", headers[2]);
 
             List<string> formattedData = new List<string>();
@@ -289,13 +289,14 @@ namespace MagicInventorySystem
                 {
                     string y = "";
                     y += string.Format("{0,10}", i);
-                    y += string.Format("{0,15}", Stock[i].Name);
+                    y += string.Format("{0,25}", Stock[i].Name);
                     y += string.Format("{0,17}", Stock[i].StockLevel);
 
                     formattedData.Add(y);
                 }
             }
 
+            // Just display, no handling as nothing is happening with the result
             DisplayTable("Current Stock", heading, formattedData);
         }
 

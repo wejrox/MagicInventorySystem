@@ -93,15 +93,12 @@ namespace MagicInventorySystem
                 Console.Write("{0, 15}", "StockLevel");
                 Console.WriteLine();
 
-                if (CurStore.StoreInventory != null && CurStore.StoreInventory.Count > 0)
+                for (int i = nextDisplayIndex; i < nextDisplayIndex + ItemsPerPage && i < CurStore.StoreInventory.Count; i++)
                 {
-                    for (int i = nextDisplayIndex; i < nextDisplayIndex + ItemsPerPage && i < CurStore.StoreInventory.Count; i++)
-                    {
-                        Console.Write("{0, 4}", i);
-                        Console.Write("{0, 30}", CurStore.StoreInventory[i].Name);
-                        Console.Write("{0, 15}", CurStore.StoreInventory[i].StockLevel);
-                        Console.WriteLine();
-                    }
+                    Console.Write("{0, 4}", i);
+                    Console.Write("{0, 30}", CurStore.StoreInventory[i].Name);
+                    Console.Write("{0, 15}", CurStore.StoreInventory[i].StockLevel);
+                    Console.WriteLine();
                 }
 
                 Console.WriteLine();
