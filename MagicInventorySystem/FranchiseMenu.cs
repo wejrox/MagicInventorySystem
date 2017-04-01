@@ -238,13 +238,13 @@ namespace MagicInventorySystem
             // Get the index of the item to add to stock
             Console.Write("Please enter the ID of the item you would like to add: ");
             int op = -1;
-            while (op < 0 || op > ownerStock.Count - 1)
+            while (op < 0 || op > dispItems.Count - 1)
             {
                 op = GetIntOptionSelected();
                 if (op == -2)
                     return;
-                if (op > ownerStock.Count - 1)
-                    Console.WriteLine("\'{0}\' is not a valid option on this list.", op);
+                if (op < 0 || op > dispItems.Count - 1)
+                    Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 0 to {1}.", op, dispItems.Count - 1);
             }
 
             // Copy the item, give default stock level
@@ -279,10 +279,10 @@ namespace MagicInventorySystem
             }
 
             // Get the option selected
-            while (option < 0 || option > stores.Count)
+            while (option < 1 || option > stores.Count)
             {
                 option = GetIntOptionSelected();
-                if (option > stores.Count)
+                if (option < 1 || option > stores.Count)
                     Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 1 to {1}.", option, stores.Count);
             }
 

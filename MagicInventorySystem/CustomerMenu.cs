@@ -286,14 +286,18 @@ namespace MagicInventorySystem
             Console.WriteLine("Please enter a Workshop ID to book into from 0 to {0}", CurStore.Workshops.Count - 1);
 
             int op = -1;
-            while (op == -1 || op > CurStore.Workshops.Count)
+            while (op < 0 || op > CurStore.Workshops.Count - 1)
             {
                 op = GetIntOptionSelected();
-                if (op > CurStore.Workshops.Count)
-                    Console.WriteLine("\'{0}\' is not a valid option", op);
+                if (op < 0 || op > CurStore.Workshops.Count - 1)
+                    Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 0 to {1}.", op, CurStore.Workshops.Count - 1);
             }
 
-            HandleWorkshopBooking(op);        
+            // Takes option, makes sure there's space, handles if not
+            HandleWorkshopBooking(op);
+
+            // Wait for use input to exit the workshop booking screen
+            Console.ReadKey();
         }
 
         // Adds the item selected to the current order, and the quantity
@@ -305,7 +309,7 @@ namespace MagicInventorySystem
                 CurStore.StoreInventory[index].RemoveStock(quantity);
             }
             // Should never happen, but just in-case
-            catch (Exception e) { Console.WriteLine("Could not add item \'{0}\' to your order.", index);  Debug.Write(e.StackTrace);  return; }
+            catch (Exception e) { Console.WriteLine("Could not add item \'{0}\' to your order.", index); Debug.Write(e.StackTrace); return; }
         }
 
         // Add the workshop to the current orders list of workshops
@@ -318,8 +322,10 @@ namespace MagicInventorySystem
                     _CustomerOrder.Workshops.Add(CurStore.Workshops[index]);
                     _CustomerOrder.BookedIntoWorkshop = true;
                     CurStore.Workshops[index].AddWorkshopParticipant();
+
+                    Console.WriteLine("Booking successful, please see receipt for booking ID.\nPress any key to continue..");
                 }
-                // Should never happen, but just in-case
+                // Should never happen as checking is done, but just in-case
                 catch (Exception) { Console.WriteLine("Could not book you into workshop \'{0}\'.", index); }
             }
             else
@@ -331,7 +337,7 @@ namespace MagicInventorySystem
         void FinalizeTransaction()
         {
             // Notify user if nothing will be displayed
-            if(_CustomerOrder.OrderItems.Count == 0 && _CustomerOrder.OrderQuantity.Count == 0 && _CustomerOrder.Workshops.Count == 0)
+            if (_CustomerOrder.OrderItems.Count == 0 && _CustomerOrder.OrderQuantity.Count == 0 && _CustomerOrder.Workshops.Count == 0)
             {
                 Console.WriteLine();
                 Console.WriteLine("There is no transaction to display, nothing has been purchased or booked into yet!\nPress any key to return to the store menu.");
@@ -353,7 +359,7 @@ namespace MagicInventorySystem
                 // Save the JSON file
                 JSONUtility.SaveStoreInventory(CurStore.StoreName, CurStore.StoreInventory);
 
-                for(int i = 0; i < _CustomerOrder.Workshops.Count; i++)
+                for (int i = 0; i < _CustomerOrder.Workshops.Count; i++)
                 {
                     // Find the current Workshop in the stores list
                     int index = CurStore.Workshops.IndexOf(_CustomerOrder.Workshops[i]);
@@ -382,28 +388,31 @@ namespace MagicInventorySystem
             // option entered
             int option = -1;
 
-            // Repeatedly prints as long as the option entered doesn't exist
-            while (option < 0 || option > stores.Count - 1)
+            // Print store menu
+            Console.WriteLine("======================================");
+            Console.WriteLine(DefaultTitle);
+            Console.WriteLine("======================================");
+            Console.WriteLine();
+            Console.WriteLine("Select a store (type in the ID desired)");
+            Console.WriteLine("--------------------------------------");
+            Console.WriteLine();
+
+            foreach (Store s in stores)
             {
-                Console.WriteLine("======================================");
-                Console.WriteLine(DefaultTitle);
-                Console.WriteLine("======================================");
+                Console.Write("{0, 4}", s.Id + 1 + ". ");
+                Console.Write("{0, 10}", s.StoreName);
                 Console.WriteLine();
-                Console.WriteLine("Select a store");
-                Console.WriteLine("--------------------------------------");
-                Console.WriteLine();
-
-                foreach (Store s in stores)
-                {
-                    Console.Write("{0, 4}", (s.Id + 1) + ". ");
-                    Console.Write("{0, 10}", s.StoreName);
-                    Console.WriteLine();
-                }
-
-                option = GetIntOptionSelected() - 1;
             }
 
-            CurStore = stores[option];
+            // Get the option selected
+            while (option < 1 || option > stores.Count)
+            {
+                option = GetIntOptionSelected();
+                if (option < 1 || option > stores.Count)
+                    Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 1 to {1}.", option, stores.Count);
+            }
+
+            CurStore = stores[option - 1];
             Title = "Customer Menu (" + CurStore.StoreName + ")";
         }
     }

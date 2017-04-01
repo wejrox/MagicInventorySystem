@@ -50,10 +50,10 @@ namespace MagicInventorySystem
             Console.WriteLine("Enter an option: ");
 
             // Get option entered until valid
-            while (option < 0 || option > Options.Count)
+            while (option < 1 || option > Options.Count)
             {
                 option = GetIntOptionSelected();
-                if (option > Options.Count)
+                if (option < 1 || option > Options.Count)
                     Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 1 to {1}.", option, Options.Count);
             }
             Console.Clear();
@@ -78,9 +78,6 @@ namespace MagicInventorySystem
                     Environment.Exit(0);
                 Console.WriteLine();
                 opt = int.Parse(op);
-
-                if (opt < 0)
-                    Console.WriteLine("\'{0}\' is below 0. Please enter a number within range.", opt);
             }
             catch (Exception)
             {

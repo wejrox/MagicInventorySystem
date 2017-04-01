@@ -107,7 +107,7 @@ namespace MagicInventorySystem
                 formattedData.Add(y);
             }
 
-            int op = DisplayTable("Current Stock", heading, formattedData);
+            int op = DisplayTable("Current Stock", heading, formattedData, true);
             // Cancel
             if (op == -2)
                 return;
@@ -181,7 +181,7 @@ namespace MagicInventorySystem
                 }
             }
 
-            int op = DisplayTable("Current Stock", heading, formattedData);
+            int op = DisplayTable("Current Stock", heading, formattedData, true);
             // Cancel
             if (op == -2)
                 return;
@@ -297,12 +297,12 @@ namespace MagicInventorySystem
             }
 
             // Just display, no handling as nothing is happening with the result
-            DisplayTable("Current Stock", heading, formattedData);
+            DisplayTable("Current Stock", heading, formattedData, false);
         }
 
         // Table for OwnerMenu
-        // Displays a table using the data given
-        int DisplayTable(string title, string heading, List<string> formattedData)
+        // Displays a table using the data given, prompts for response if needed
+        int DisplayTable(string title, string heading, List<string> formattedData, bool needsProcessing)
         {
             int option = -1;
             // Generate the title
@@ -318,16 +318,25 @@ namespace MagicInventorySystem
                 Console.WriteLine(s);
 
             Console.WriteLine();
-            Console.WriteLine("Enter a request to process: ");
 
-            while (option < 0 || option > formattedData.Count)
+            if (needsProcessing)
             {
-                option = GetIntOptionSelected();
-                // Cancel
-                if (option == -2)
-                    return -2;
-                if (option > formattedData.Count - 1)
-                    Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 0 to {1}.", option, formattedData.Count + 1);
+                Console.WriteLine("Enter a request to process: ");
+
+                while (option < 0 || option > formattedData.Count)
+                {
+                    option = GetIntOptionSelected();
+                    // Cancel
+                    if (option == -2)
+                        return -2;
+                    if (option > formattedData.Count - 1)
+                        Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 0 to {1}.", option, formattedData.Count + 1);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Press any key to return to the previous menu.");
+                Console.ReadKey();
             }
 
             return option;
