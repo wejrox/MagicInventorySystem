@@ -31,12 +31,14 @@ namespace MagicInventorySystem
             };
 
             Stock = JSONUtility.GetInventory("Owners");
+            
             Stores = new List<Store> {
                 new Store("Olinda"),
                 new Store("Springvale"),
                 new Store("Altona"),
                 new Store("Melbourne"),
                 new Store("Epping")};
+                
             StockRequests = JSONUtility.GetStockRequests();
         }
 
@@ -84,18 +86,21 @@ namespace MagicInventorySystem
 
             List<string> formattedData = new List<string>();
             // Generate each line
-            foreach (StockRequest sr in StockRequests)
+            if (StockRequests != null && StockRequests.Count > 0)
             {
-                string y = "";
-                bool available = sr.Quantity < sr.ItemRequested.StockLevel;
-                y += string.Format("{0,10}", sr.Id);
-                y += string.Format("{0,15}", Stores[sr.StoreRequesting].StoreName);
-                y += string.Format("{0,17}", sr.ItemRequested.Name);
-                y += string.Format("{0,17}", sr.Quantity);
-                y += string.Format("{0,17}", sr.ItemRequested.StockLevel);
-                y += string.Format("{0,17}", available);
+                foreach (StockRequest sr in StockRequests)
+                {
+                    string y = "";
+                    bool available = sr.Quantity < sr.ItemRequested.StockLevel;
+                    y += string.Format("{0,10}", sr.Id);
+                    y += string.Format("{0,15}", Stores[sr.StoreRequesting].StoreName);
+                    y += string.Format("{0,17}", sr.ItemRequested.Name);
+                    y += string.Format("{0,17}", sr.Quantity);
+                    y += string.Format("{0,17}", sr.ItemRequested.StockLevel);
+                    y += string.Format("{0,17}", available);
 
-                formattedData.Add(y);
+                    formattedData.Add(y);
+                }
             }
 
             int op = DisplayTable("Current Stock", heading, formattedData);
