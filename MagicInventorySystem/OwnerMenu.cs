@@ -71,7 +71,7 @@ namespace MagicInventorySystem
         // Prints out all current stock requests
         void DisplayAllStockRequests()
         {
-            if (StockRequests?.Any() == true)
+            if (StockRequests?.Any() != true)
             {
                 Console.WriteLine("There are no stock requests to process. Press any key to return to the previous menu.");
                 Console.ReadKey();
@@ -137,7 +137,7 @@ namespace MagicInventorySystem
         // Prints out stock requests with availabiity matching parameter
         void DisplayStockRequests(bool available)
         {
-            if (StockRequests?.Any() == true)
+            if (StockRequests?.Any() != true)
             {
                 Console.WriteLine("There are no stock requests to process. Press any key to return to the previous menu.");
                 Console.ReadKey();
@@ -229,6 +229,13 @@ namespace MagicInventorySystem
 
         void DisplayAllProductLines()
         {
+            if (Stock?.Any() != true)
+            {
+                Console.WriteLine("There is no stock. Press any key to return to the previous menu.");
+                Console.ReadKey();
+                return;
+            }
+
             string[] headers = { "ID", "Product", "Current Stock" };
 
             //Generate heading
