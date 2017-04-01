@@ -68,6 +68,13 @@ namespace MagicInventorySystem
         // Display the product menu
         void DisplayProducts()
         {
+            if (CurStore?.StoreInventory?.Any() != true)
+            {
+                Console.WriteLine("There is no stock to display. Press any key to return to the previous menu.");
+                Console.ReadKey();
+                return;
+            }
+
             // option entered
             int option = -1;
             // The index to start the next page on
@@ -242,53 +249,52 @@ namespace MagicInventorySystem
         // Display all workshops, let user choose one
         void DisplayWorkshops()
         {
-            if (CurStore.Workshops != null && CurStore.Workshops.Count > 0)
+            if (CurStore?.Workshops?.Any() != true)
             {
-                Console.WriteLine("======================================");
-                Console.WriteLine(DefaultTitle);
-                Console.WriteLine(Title);
-                Console.WriteLine("======================================");
-                Console.WriteLine();
-                Console.WriteLine("Workshops");
-                Console.WriteLine("-------------------------------------");
-                Console.WriteLine();
-
-                Console.Write("{0, 4}", "ID");
-                Console.Write("{0, 12}", "Time");
-                Console.Write("{0, 20}", "Cur. Participants");
-                Console.Write("{0, 20}", "Max. Participants");
-                Console.Write("{0, 20}", "Places Remaining");
-                Console.WriteLine();
-
-                for (int i = 0; i < CurStore.Workshops.Count; i++)
-                {
-                    Console.Write("{0, 4}", i);
-                    Console.Write("{0, 12}", CurStore.Workshops[i].WorkshopTime);
-                    Console.Write("{0, 20}", CurStore.Workshops[i].CurWorkshopParticipants);
-                    Console.Write("{0, 20}", CurStore.Workshops[i].MaxWorkshopParticipants);
-                    Console.Write("{0, 20}", (CurStore.Workshops[i].MaxWorkshopParticipants - CurStore.Workshops[i].CurWorkshopParticipants));
-                    Console.WriteLine();
-                }
-
-                Console.WriteLine();
-                Console.WriteLine("Please enter a Workshop ID to book into from 0 to {0}", CurStore.Workshops.Count - 1);
-
-                int op = -1;
-                while (op == -1 || op > CurStore.Workshops.Count)
-                {
-                    op = GetIntOptionSelected();
-                    if (op > CurStore.Workshops.Count)
-                        Console.WriteLine("\'{0}\' is not a valid option", op);
-                }
-
-                HandleWorkshopBooking(op);
-            }
-            // Should only happen before project completion
-            else
-            {
-                Console.WriteLine("No Workshops exist! Press any key to return to the previous menu...");
+                Console.WriteLine("There are no workshops to enrol in. Press any key to return to the previous menu.");
                 Console.ReadKey();
-            }            
+                return;
+            }
+
+            Console.WriteLine("======================================");
+            Console.WriteLine(DefaultTitle);
+            Console.WriteLine(Title);
+            Console.WriteLine("======================================");
+            Console.WriteLine();
+            Console.WriteLine("Workshops");
+            Console.WriteLine("-------------------------------------");
+            Console.WriteLine();
+
+            Console.Write("{0, 4}", "ID");
+            Console.Write("{0, 12}", "Time");
+            Console.Write("{0, 20}", "Cur. Participants");
+            Console.Write("{0, 20}", "Max. Participants");
+            Console.Write("{0, 20}", "Places Remaining");
+            Console.WriteLine();
+
+            for (int i = 0; i < CurStore.Workshops.Count; i++)
+            {
+                Console.Write("{0, 4}", i);
+                Console.Write("{0, 12}", CurStore.Workshops[i].WorkshopTime);
+                Console.Write("{0, 20}", CurStore.Workshops[i].CurWorkshopParticipants);
+                Console.Write("{0, 20}", CurStore.Workshops[i].MaxWorkshopParticipants);
+                Console.Write("{0, 20}", (CurStore.Workshops[i].MaxWorkshopParticipants - CurStore.Workshops[i].CurWorkshopParticipants));
+                Console.WriteLine();
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Please enter a Workshop ID to book into from 0 to {0}", CurStore.Workshops.Count - 1);
+
+            int op = -1;
+            while (op == -1 || op > CurStore.Workshops.Count)
+            {
+                op = GetIntOptionSelected();
+                if (op > CurStore.Workshops.Count)
+                    Console.WriteLine("\'{0}\' is not a valid option", op);
+            }
+
+            HandleWorkshopBooking(op);
+            }          
         }
 
         // Adds the item selected to the current order, and the quantity
@@ -297,6 +303,7 @@ namespace MagicInventorySystem
             try
             {
                 _CustomerOrder.AddItem(CurStore.StoreInventory[index], quantity);
+                CurStore.StoreInventory[index].RemoveStock()
             }
             // Should never happen, but just in-case
             catch (Exception e) { Console.WriteLine("Could not add item \'{0}\' to your order.", index);  Debug.Write(e.StackTrace);  return; }
@@ -361,7 +368,7 @@ namespace MagicInventorySystem
             Console.Clear();
             Console.WriteLine(_CustomerOrder);
 
-            // Wait for a key to finish viewing teh receipt
+            // Wait for key-press to finish viewing the receipt
             Console.WriteLine("Please press any key when you have finished viewing the receipt.");
             Console.ReadKey();
 
