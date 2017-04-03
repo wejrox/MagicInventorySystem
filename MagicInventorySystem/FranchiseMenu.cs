@@ -141,13 +141,26 @@ namespace MagicInventorySystem
                 // If the user cancels
                 if (op == -2)
                     return;
-                if(op > posReq.Count - 1)
+                if(op < 0 || op > posReq.Count - 1)
                     Console.WriteLine("\'{0}\' is not a valid option on this list.", op);
                 // Don't let the user re-stock if it doesn't need it
                 else if (posReq[op].StockLevel > threshold)
                 {
-                    Console.WriteLine("This item doesn't meet the threshold requirements for restocking.");
-                    op = -1; // Reset option so the loop continues
+                    Console.WriteLine("This item doesn't meet the threshold requirements for restocking. Would you like to request anyway?(Y/y or N/n)");
+                    string op1 = "";
+                    while (op1.ToLower() != "y" && op1.ToLower() != "n")
+                    {
+                        op1 = Console.ReadLine();
+
+                        if (op1.ToLower() != "y" && op1.ToLower() != "n")
+                            Console.WriteLine("\'{0}\' is not a valid option", op1);
+                    }
+
+                    // Reset the loop if user wants to abort
+                    if(op1.ToLower() == "n")
+                        op = -1;
+
+                    // If user wants to continue nothing is changed and the option will be processed
                 }
             }
             #endregion
@@ -155,12 +168,16 @@ namespace MagicInventorySystem
             // How many to request?
             Console.WriteLine("How many would you like? (Max 20)");
             int amt = -1;
-            while (amt < 0 || amt > 20) // Nobody should order more than 99?
+            while (amt < 1 || amt > 20) // Nobody should order more than 99?
             {
                 amt = GetIntOptionSelected();
                 // If the user cancels
-                if (op == -2)
+                if (amt == -2)
                     return;
+                if (amt < 1)
+                    Console.WriteLine("You must request at least 1 stock");
+                else if (amt > 20)
+                    Console.WriteLine("You can't request more than 20 stock as that is the maximum we have at any given time.");
             }
 
             // Create the request
@@ -200,38 +217,36 @@ namespace MagicInventorySystem
             Console.WriteLine();
 
             List<Item> dispItems = new List<Item>();
-            // Display stock items not in store inventory
-            if (ownerStock != null && ownerStock.Count > 0)
+
+            // Generate stock items to display
+            for (int i = 0; i < ownerStock.Count; i++)
             {
-                for(int i = 0; i < ownerStock.Count; i++)
-                {
-                    // Display if the current store doesn't contain the item
-                    bool shouldDisplay = true;
+                // Display if the current store doesn't contain the item
+                bool shouldDisplay = true;
 
-                    // Check that this item doesn't exist in your inventory
-                    for (int x = 0; x < CurStore.StoreInventory.Count; x++)
+                // Check that this item doesn't exist in your inventory
+                for (int x = 0; x < CurStore.StoreInventory.Count; x++)
+                {
+                    // Check names
+                    if (CurStore.StoreInventory[x].Name == ownerStock[i].Name)
                     {
-                        // Check names
-                        if (CurStore.StoreInventory[x].Name == ownerStock[i].Name)
-                        {
-                            // Don't display it
-                            shouldDisplay = false;
-                            break; // Leave loop if item been found
-                        }
+                        // Don't display it
+                        shouldDisplay = false;
+                        break; // Leave loop if item been found
                     }
-
-                    if(shouldDisplay)
-                        dispItems.Add(ownerStock[i]);
                 }
 
-                // Print items
-                for(int i = 0; i < dispItems.Count; i++)
-                {
-                    Console.Write("{0, 4}", i);
-                    Console.Write("{0, 30}", dispItems[i].Name);
-                    Console.Write("{0, 15}", dispItems[i].StockLevel);
-                    Console.WriteLine();
-                }
+                if(shouldDisplay)
+                    dispItems.Add(ownerStock[i]);
+            }
+
+            // Print items
+            for(int i = 0; i < dispItems.Count; i++)
+            {
+                Console.Write("{0, 4}", i);
+                Console.Write("{0, 30}", dispItems[i].Name);
+                Console.Write("{0, 15}", dispItems[i].StockLevel);
+                Console.WriteLine();
             }
 
             Console.WriteLine();
@@ -248,11 +263,16 @@ namespace MagicInventorySystem
             }
 
             // Copy the item, give default stock level
-            Item item = new Item(dispItems[op].Name, 10, dispItems[op].Price);
+            Item item = new Item(dispItems[op].Name, 0, dispItems[op].Price);
             // Add the item
             CurStore.AddInventoryItem(item);
 
-            Console.WriteLine("\'{0}\' has been added to your inventory! (10 Units)\nPress any key to return to the Franchise Holder Menu", item.Name);
+            // Create the request of the last item added
+            StockRequest sr = new StockRequest(CurStore.StoreInventory[CurStore.StoreInventory.Count - 1], CurStore.Id, 10);
+            // Handle Request
+            JSONUtility.AddAndSaveStockRequest(sr);
+
+            Console.WriteLine("\'{0}\' has been added to your inventory, the Owner will process your stock request. \nPress any key to return to the Franchise Holder Menu", item.Name);
             Console.ReadKey();
         }
 

@@ -93,8 +93,10 @@ namespace MagicInventorySystem
         {
             Console.WriteLine("True/False?");
             string response = "";
+            // Should never be returned
             bool bResponse = false;
 
+            // Can't cancel out of this, must return valid option.
             while (response.ToLower() != "t" && response.ToLower() != "true" &&
                     response.ToLower() != "f" && response.ToLower() != "false")
             {

@@ -71,6 +71,7 @@ namespace MagicInventorySystem
         // Prints out all current stock requests
         void DisplayAllStockRequests()
         {
+            StockRequests = JSONUtility.GetStockRequests();
             if (StockRequests?.Any() != true)
             {
                 Console.WriteLine("There are no stock requests to process. Press any key to return to the previous menu.");
@@ -93,16 +94,24 @@ namespace MagicInventorySystem
 
             List<string> formattedData = new List<string>();
             // Generate each line
-            foreach (StockRequest sr in StockRequests)
+            for (int i = 0; i < StockRequests.Count; i++)
             {
+                // Get the current Item's index
+                int reqItemOwnerIndex = -1;
+                for (int x = 0; x < Stock.Count; x++)
+                {
+                    if (Stock[x].Name == StockRequests[i].ItemRequested.Name)
+                        reqItemOwnerIndex = x;
+                }
+
                 string y = "";
-                bool available = sr.Quantity <= Stock[sr.ItemRequested.Id].StockLevel;
-                y += string.Format("{0,10}", sr.Id);
-                y += string.Format("{0,15}", Stores[sr.StoreRequesting].StoreName);
-                y += string.Format("{0,17}", sr.ItemRequested.Name);
-                y += string.Format("{0,17}", sr.Quantity);
-                y += string.Format("{0,17}", Stock[sr.ItemRequested.Id].StockLevel);
-                y += string.Format("{0,17}", available);
+                bool _available = StockRequests[i].Quantity < Stock[reqItemOwnerIndex].StockLevel;
+                y += string.Format("{0,10}", i);
+                y += string.Format("{0,15}", Stores[StockRequests[i].StoreRequesting].StoreName);
+                y += string.Format("{0,17}", StockRequests[i].ItemRequested.Name);
+                y += string.Format("{0,17}", StockRequests[i].Quantity);
+                y += string.Format("{0,17}", Stock[reqItemOwnerIndex].StockLevel);
+                y += string.Format("{0,17}", _available);
 
                 formattedData.Add(y);
             }
@@ -120,6 +129,7 @@ namespace MagicInventorySystem
                     id = i;
             }
 
+
             if (id == -1)
             {
                 Console.WriteLine("Item selected doesn't exist in Owner inventory");
@@ -128,11 +138,12 @@ namespace MagicInventorySystem
             }
 
             if (StockRequests[op].Quantity <= Stock[id].StockLevel)
+            {
                 ProcessRequest(op);
+                Console.WriteLine("Stock has successfully been added! Press any key to continue..");
+            }
             else
-                Console.WriteLine("Cannot process request as there is not enough stock");
-
-            Console.WriteLine(op);
+                Console.WriteLine("Cannot process request as there is not enough stock.");
 
             Console.ReadKey();
         }
@@ -141,6 +152,7 @@ namespace MagicInventorySystem
         void DisplayStockRequests(bool available)
         {
             StockRequests = JSONUtility.GetStockRequests();
+
             if (StockRequests?.Any() != true)
             {
                 Console.WriteLine("There are no stock requests to process. Press any key to return to the previous menu.");
@@ -166,18 +178,26 @@ namespace MagicInventorySystem
             // Uses for loop as we need i for the id to handle, as StockRequests.Id is unique
             for (int i = 0; i < StockRequests.Count; i++)
             {
-                string y = "";
-                bool _available = StockRequests[i].Quantity < StockRequests[i].ItemRequested.StockLevel;
+                // Get the current Item's index
+                int reqItemOwnerIndex = -1;
+                for (int x = 0; x < Stock.Count; x++)
+                {
+                    if (Stock[x].Name == StockRequests[i].ItemRequested.Name)
+                        reqItemOwnerIndex = x;
+                }
+
+                string reqDetails = "";
+                bool _available = StockRequests[i].Quantity < Stock[reqItemOwnerIndex].StockLevel;
                 if (_available == available)
                 {
-                    y += string.Format("{0,10}", i);
-                    y += string.Format("{0,15}", Stores[StockRequests[i].StoreRequesting].StoreName);
-                    y += string.Format("{0,17}", StockRequests[i].ItemRequested.Name);
-                    y += string.Format("{0,17}", StockRequests[i].Quantity);
-                    y += string.Format("{0,17}", StockRequests[i].ItemRequested.StockLevel);
-                    y += string.Format("{0,17}", available);
+                    reqDetails += string.Format("{0,10}", i);
+                    reqDetails += string.Format("{0,15}", Stores[StockRequests[i].StoreRequesting].StoreName);
+                    reqDetails += string.Format("{0,17}", StockRequests[i].ItemRequested.Name);
+                    reqDetails += string.Format("{0,17}", StockRequests[i].Quantity);
+                    reqDetails += string.Format("{0,17}", Stock[reqItemOwnerIndex].StockLevel);
+                    reqDetails += string.Format("{0,17}", available);
 
-                    formattedData.Add(y);
+                    formattedData.Add(reqDetails);
                 }
             }
 
@@ -185,9 +205,9 @@ namespace MagicInventorySystem
             // Cancel
             if (op == -2)
                 return;
+
             //Data Validation
             int id = -1;
-
             for (int i = 0; i < Stock.Count; i++)
             {
                 if (Stock[i].Name == StockRequests[op].ItemRequested.Name)
@@ -202,8 +222,14 @@ namespace MagicInventorySystem
             }
 
             if (StockRequests[op].Quantity < Stock[id].StockLevel)
+            {
                 ProcessRequest(op);
-            Console.WriteLine(op);
+                Console.WriteLine("Stock has successfully been added! Press any key to continue..");
+            }
+            else
+                Console.WriteLine("Cannot process request as there is not enough stock.");
+
+            Console.ReadKey();
         }
 
         // Removes from _itemStock StockLevel
@@ -254,12 +280,15 @@ namespace MagicInventorySystem
                 return;
             }
 
-            JSONUtility.SaveStockRequests(StockRequests);
+            // Update the owners stock
+            JSONUtility.SaveStoreInventory("Owners", Stock);
+            // Update the store inventory
             JSONUtility.SaveStoreInventory(Stores[storeId].StoreName, Stores[storeId].StoreInventory);
+            // Update Stock Requests
+            JSONUtility.SaveStockRequests(StockRequests);
 
             // Notify user of successs
             Console.WriteLine("Stock request has successfully been handled. Press any key to return to the previous menu.");
-            Console.ReadKey();
         }
 
         void DisplayAllProductLines()
@@ -323,14 +352,14 @@ namespace MagicInventorySystem
             {
                 Console.WriteLine("Enter a request to process: ");
 
-                while (option < 0 || option > formattedData.Count)
+                while (option < 0 || option > formattedData.Count - 1)
                 {
                     option = GetIntOptionSelected();
                     // Cancel
                     if (option == -2)
                         return -2;
-                    if (option > formattedData.Count - 1)
-                        Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 0 to {1}.", option, formattedData.Count + 1);
+                    if (option < 0 || option > formattedData.Count - 1)
+                        Console.WriteLine("\'{0}\' is not a valid option. Please enter a valid option from 0 to {1}.", option, formattedData.Count - 1);
                 }
             }
             else

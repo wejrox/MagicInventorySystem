@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics;
 using Newtonsoft.Json;
 
 namespace MagicInventorySystem
@@ -33,11 +34,12 @@ namespace MagicInventorySystem
                     f.Close();
                 }
             }
-
+            
             // Make sure the owner's inventory contains stock
-            if(GetInventory("Owners") == null)
+            List<Item> tempInv = GetInventory("Owners");
+            if (tempInv?.Any() != true)
             {
-                List<Item> tempInv = new List<Item> {
+                tempInv = new List<Item> {
                     new Item("Rabbit", 20, 20.0f),
                     new Item("Hat", 20, 25.0f),
                     new Item("Wand", 20, 15.0f),
@@ -54,12 +56,13 @@ namespace MagicInventorySystem
                     new Item("Regular Silks", 20, 10.0f),
                     new Item("Trick Silks", 20, 20.0f),
                     new Item("Cup and Balls", 20, 5.0f),
-                    new Item("Beginners Kit", 30, 50.0f)
+                    new Item("Beginners Kit", 20, 50.0f)
                 };
 
-                SaveStoreInventory("Owners", tempInv);
+                SaveStoreInventory("Owners1", tempInv);
+                
             }
-
+            
         }
 
         #region Reading from JSON
@@ -90,7 +93,7 @@ namespace MagicInventorySystem
         }
         #endregion
 
-        #region Writing to files
+        #region Writing to JSON
         // Saves the Inventory of the store given
         public static void SaveStoreInventory(string storeName, List<Item> inventory)
         {
