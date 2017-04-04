@@ -10,7 +10,7 @@ namespace MagicInventorySystem
 {
     class OwnerMenu : Menu
     {
-        // Stock Items (Perhaps make a stock class?)
+        // Stock Items
         List<Item> Stock = new List<Item>();
         // Stores
         public List<Store> Stores { get; private set; }
@@ -165,7 +165,6 @@ namespace MagicInventorySystem
             // Generate heading
             string heading = "";
             // Generate heading
-            // The first 2 columns are always the same (ID, Product Name) so they are set first
             heading += string.Format("{0,10}", headers[0]);
             heading += string.Format("{0,15}", headers[1]);
             heading += string.Format("{0,17}", headers[2]);
@@ -175,7 +174,6 @@ namespace MagicInventorySystem
 
             List<string> formattedData = new List<string>();
             // Generate each line
-            // Uses for loop as we need i for the id to handle, as StockRequests.Id is unique
             for (int i = 0; i < StockRequests.Count; i++)
             {
                 // Get the current Item's index
@@ -186,6 +184,7 @@ namespace MagicInventorySystem
                         reqItemOwnerIndex = x;
                 }
 
+                // Create each line
                 string reqDetails = "";
                 bool _available = StockRequests[i].Quantity < Stock[reqItemOwnerIndex].StockLevel;
                 if (_available == available)
@@ -232,16 +231,9 @@ namespace MagicInventorySystem
             Console.ReadKey();
         }
 
-        // Removes from _itemStock StockLevel
-        // Adds the stock to the shop's inventory stock level
-        // Delete stock request
-        // Updates inventory files
-        // Doesn't need nullchecks as it has been performed before the function is called
+        // Modifies required files and arrays to indicate a stock request being handled
         void ProcessRequest(int opSelected)
-        {            
-            // Remove stock from Stock item using stockIndex
-            // Add stock to the store's Inventory using the Stock Request item name
-            // Save the JSON files for StockRequest and the store that's been updated
+        {
             Item req = StockRequests[opSelected].ItemRequested;
             int storeId = StockRequests[opSelected].StoreRequesting;
             int amountToGive = StockRequests[opSelected].Quantity;
