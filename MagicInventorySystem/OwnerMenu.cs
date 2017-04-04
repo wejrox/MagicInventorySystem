@@ -105,7 +105,7 @@ namespace MagicInventorySystem
                 }
 
                 string y = "";
-                bool _available = StockRequests[i].Quantity < Stock[reqItemOwnerIndex].StockLevel;
+                bool _available = StockRequests[i].Quantity <= Stock[reqItemOwnerIndex].StockLevel;
                 y += string.Format("{0,10}", i);
                 y += string.Format("{0,15}", Stores[StockRequests[i].StoreRequesting].StoreName);
                 y += string.Format("{0,17}", StockRequests[i].ItemRequested.Name);
@@ -186,7 +186,7 @@ namespace MagicInventorySystem
 
                 // Create each line
                 string reqDetails = "";
-                bool _available = StockRequests[i].Quantity < Stock[reqItemOwnerIndex].StockLevel;
+                bool _available = StockRequests[i].Quantity <= Stock[reqItemOwnerIndex].StockLevel;
                 if (_available == available)
                 {
                     reqDetails += string.Format("{0,10}", i);
@@ -220,7 +220,7 @@ namespace MagicInventorySystem
                 return;
             }
 
-            if (StockRequests[op].Quantity < Stock[id].StockLevel)
+            if (StockRequests[op].Quantity <= Stock[id].StockLevel)
             {
                 ProcessRequest(op);
                 Console.WriteLine("Stock has successfully been added! Press any key to continue..");
@@ -249,6 +249,22 @@ namespace MagicInventorySystem
 
             if(itemIndex == -1)
             {
+                Console.WriteLine("Item selected doesn't exist in the stores inventory to be replenished, press any key to cancel.");
+                Console.ReadKey();
+                return;
+            }
+
+            // Find the item in the stock inventory
+            int stockId = -1;
+            for (int i = 0; i < Stock.Count; i++)
+            {
+                // Name must match
+                if (Stock[i].Name == req.Name)
+                    stockId = i;
+            }
+
+            if (stockId == -1)
+            {
                 Console.WriteLine("Item selected doesn't exist in your stock list, press any key to cancel.");
                 Console.ReadKey();
                 return;
@@ -257,7 +273,7 @@ namespace MagicInventorySystem
             try
             {
                 // Remove from owner stock
-                Stock[opSelected].RemoveStock(amountToGive);
+                Stock[stockId].RemoveStock(amountToGive);
 
                 // Add stock to store requesting
                 Stores[storeId].StoreInventory[itemIndex].AddStock(amountToGive);
